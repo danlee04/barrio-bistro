@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
+use App\Models\MenuItem;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 
@@ -16,6 +17,8 @@ class CurrentUserController extends Controller
         return UserResource::make($user)->additional([
             'abilities' => [
                 'manage_staff' => $user->can('viewAny', User::class),
+                'manage_menu' => $user->can('create', MenuItem::class),
+                'update_availability' => $user->can('updateAvailability', MenuItem::class),
             ],
         ]);
     }

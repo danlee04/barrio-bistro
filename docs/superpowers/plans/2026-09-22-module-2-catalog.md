@@ -2196,11 +2196,11 @@ use RuntimeException;
 class MenuPhotoProcessor
 {
     /**
-     * Square renditions to generate: file suffix => edge in pixels.
+     * Edges (in pixels) of the square renditions to generate; each is saved as "{base}-{edge}.webp".
      *
-     * @var array<string, int>
+     * @var list<positive-int>
      */
-    private const RENDITIONS = ['400' => 400, '800' => 800];
+    private const EDGES = [400, 800];
 
     /**
      * Re-encode an uploaded photo into square WebP renditions and return their base path.
@@ -2213,8 +2213,8 @@ class MenuPhotoProcessor
         $square = $this->cropToSquare($this->decode($photo));
         $basePath = sprintf('menu-items/%s/%s', now()->format('Y/m'), Str::lower((string) Str::ulid()));
 
-        foreach (self::RENDITIONS as $suffix => $edge) {
-            Storage::disk('public')->put("{$basePath}-{$suffix}.webp", $this->encodeWebp($square, $edge));
+        foreach (self::EDGES as $edge) {
+            Storage::disk('public')->put("{$basePath}-{$edge}.webp", $this->encodeWebp($square, $edge));
         }
 
         return $basePath;
@@ -2226,8 +2226,8 @@ class MenuPhotoProcessor
     public function delete(string $basePath): void
     {
         Storage::disk('public')->delete(array_map(
-            fn (string $suffix): string => "{$basePath}-{$suffix}.webp",
-            array_keys(self::RENDITIONS),
+            fn (int $edge): string => "{$basePath}-{$edge}.webp",
+            self::EDGES,
         ));
     }
 
@@ -2297,6 +2297,8 @@ class MenuPhotoProcessor
 
     /**
      * Scale the square down to the given edge and encode it as WebP.
+     *
+     * @param  positive-int  $edge
      */
     private function encodeWebp(GdImage $square, int $edge): string
     {

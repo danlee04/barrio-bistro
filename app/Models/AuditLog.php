@@ -73,9 +73,12 @@ class AuditLog extends Model
     }
 
     /**
-     * Record an update as a before/after diff of the attributes changed by the last save.
+     * Record an update as a before/after diff of the attributes changed by the last save,
+     * plus any extra before/after pairs the caller computed (e.g. a price list).
+     *
+     * @param  array<string, array{from: mixed, to: mixed}>  $extraChanges
      */
-    public static function recordChange(string $action, Model $subject, ?User $causer = null): self
+    public static function recordChange(string $action, Model $subject, ?User $causer = null, array $extraChanges = []): self
     {
         $previous = $subject->getPrevious();
         $changes = [];
@@ -88,7 +91,7 @@ class AuditLog extends Model
             $changes[$attribute] = ['from' => $previous[$attribute] ?? null, 'to' => $newValue];
         }
 
-        return self::record($action, $subject, $causer, changes: $changes);
+        return self::record($action, $subject, $causer, changes: [...$changes, ...$extraChanges]);
     }
 
     /**

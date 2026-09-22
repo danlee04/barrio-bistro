@@ -1,10 +1,15 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\MenuItemController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffPasswordController;
 use App\Http\Controllers\CurrentUserController;
 use App\Http\Controllers\CurrentUserPasswordController;
+use App\Http\Controllers\PublicMenuController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/menu', PublicMenuController::class)->name('menu.show');
 
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/me', CurrentUserController::class)->name('me.show');
@@ -18,6 +23,21 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
             Route::post('/staff', [StaffController::class, 'store'])->name('staff.store');
             Route::patch('/staff/{user}', [StaffController::class, 'update'])->name('staff.update');
             Route::put('/staff/{user}/password', StaffPasswordController::class)->name('staff.password.update');
+
+            Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+            Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+            Route::patch('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+            Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+            Route::post('/categories/{category}/restore', [CategoryController::class, 'restore'])->withTrashed()->name('categories.restore');
+            Route::post('/categories/{category}/move', [CategoryController::class, 'move'])->name('categories.move');
+
+            Route::get('/menu-items', [MenuItemController::class, 'index'])->name('menu-items.index');
+            Route::post('/menu-items', [MenuItemController::class, 'store'])->name('menu-items.store');
+            Route::get('/menu-items/{menuItem}', [MenuItemController::class, 'show'])->name('menu-items.show');
+            Route::patch('/menu-items/{menuItem}', [MenuItemController::class, 'update'])->name('menu-items.update');
+            Route::delete('/menu-items/{menuItem}', [MenuItemController::class, 'destroy'])->name('menu-items.destroy');
+            Route::post('/menu-items/{menuItem}/restore', [MenuItemController::class, 'restore'])->withTrashed()->name('menu-items.restore');
+            Route::post('/menu-items/{menuItem}/move', [MenuItemController::class, 'move'])->name('menu-items.move');
         });
     });
 });

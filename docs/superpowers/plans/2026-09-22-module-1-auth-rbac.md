@@ -20,49 +20,51 @@
 - A failed login never reveals whether the email exists or whether the account is deactivated. It always says `auth.failed`.
 - Passwords: `Password::defaults()` (min 12, `uncompromised()` in production). Never log or return a password.
 - Staff are never deleted (order history). Deactivate instead.
-- Security rules in `CLAUDE.md` → *Security Guidelines* apply to every task.
+- Security rules in `CLAUDE.md` → _Security Guidelines_ apply to every task.
 - After PHP edits: `vendor/bin/pint --dirty --format agent`. Tests: `php artisan test --compact`.
 - New npm packages allowed in this module: the shadcn components (and the `radix-ui`/`lucide-react` they pull in), plus `get-nonce` (see Task 8). Nothing else.
 
 ## File Map
 
-| File | Change | Responsibility |
-|---|---|---|
-| `app/Enums/Role.php` | Create | `Admin`, `Cashier`, `Kitchen` + labels |
-| `database/migrations/2026_09_22_100000_add_staff_columns_to_users_table.php` | Create | `role`, `is_active`, `must_change_password`, `last_login_at` |
-| `database/migrations/2026_09_22_100100_create_audit_logs_table.php` | Create | Append-only audit trail |
-| `app/Models/User.php` | Modify | Casts, `hasRole()`, `isAdmin()`, `active` scope |
-| `app/Models/AuditLog.php` | Create | `record()`, `recordChange()`, redaction |
-| `database/factories/UserFactory.php` | Modify | Role/state helpers; drop `unverified()` |
-| `app/Providers/AppServiceProvider.php` | Modify | `Gate::before`, auth-event audit listeners |
-| `app/Http/Requests/Auth/LoginRequest.php` | Modify | Refuse deactivated accounts with the generic message |
-| `app/Http/Controllers/Auth/AuthenticatedSessionController.php` | Modify | Stamp `last_login_at` |
-| `app/Http/Resources/UserResource.php` | Create | The only shape a user leaves the API in |
-| `app/Http/Controllers/CurrentUserController.php` | Create | `GET /api/v1/me` |
-| `app/Http/Controllers/CurrentUserPasswordController.php`, `app/Http/Requests/UpdateCurrentUserPasswordRequest.php` | Create | `PUT /api/v1/me/password` |
-| `app/Http/Middleware/EnsureUserIsActive.php`, `EnsurePasswordIsChanged.php`, `EnsureUserHasRole.php` | Create | `active`, `password.changed`, `role:` |
-| `app/Policies/UserPolicy.php` | Create | Staff management abilities |
-| `app/Http/Controllers/Admin/StaffController.php`, `StaffPasswordController.php` | Create | Staff API |
-| `app/Http/Requests/Admin/ListStaffRequest.php`, `StoreStaffRequest.php`, `UpdateStaffRequest.php`, `ResetStaffPasswordRequest.php` | Create | Staff validation + authorization |
-| `app/Console/Commands/CreateAdminCommand.php` | Create | `php artisan app:create-admin` |
-| `routes/api.php`, `routes/auth.php`, `bootstrap/app.php` | Modify | Routes and middleware aliases |
-| `app/Http/Controllers/Auth/VerifyEmailController.php`, `EmailVerificationNotificationController.php`, `app/Http/Middleware/EnsureEmailIsVerified.php`, `tests/Feature/Auth/EmailVerificationTest.php` | **Delete** (approved) | Email verification is not used |
-| `database/seeders/DatabaseSeeder.php` | Modify | Demo staff in `local` only; no default admin |
-| `resources/views/app.blade.php`, `resources/js/app.tsx` | Modify | Expose the CSP nonce to Radix |
-| `resources/js/lib/http.ts`, `lib/auth.ts`, `lib/staff.ts`, `types/auth.ts` | Create/Replace | API client, loaders, types |
-| `resources/js/components/form-field.tsx`, `components/staff/*` | Create | Form + dialogs |
-| `resources/js/pages/auth/login.tsx`, `pages/account/change-password.tsx`, `pages/admin/dashboard.tsx`, `pages/admin/staff.tsx`, `pages/route-error.tsx`, `layouts/admin-layout.tsx` | Create | Screens |
-| `resources/js/router.tsx` | Modify | Routes + loaders |
+| File                                                                                                                                                                                                  | Change                | Responsibility                                               |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------------------------------------------------ |
+| `app/Enums/Role.php`                                                                                                                                                                                  | Create                | `Admin`, `Cashier`, `Kitchen` + labels                       |
+| `database/migrations/2026_09_22_100000_add_staff_columns_to_users_table.php`                                                                                                                          | Create                | `role`, `is_active`, `must_change_password`, `last_login_at` |
+| `database/migrations/2026_09_22_100100_create_audit_logs_table.php`                                                                                                                                   | Create                | Append-only audit trail                                      |
+| `app/Models/User.php`                                                                                                                                                                                 | Modify                | Casts, `hasRole()`, `isAdmin()`, `active` scope              |
+| `app/Models/AuditLog.php`                                                                                                                                                                             | Create                | `record()`, `recordChange()`, redaction                      |
+| `database/factories/UserFactory.php`                                                                                                                                                                  | Modify                | Role/state helpers; drop `unverified()`                      |
+| `app/Providers/AppServiceProvider.php`                                                                                                                                                                | Modify                | `Gate::before`, auth-event audit listeners                   |
+| `app/Http/Requests/Auth/LoginRequest.php`                                                                                                                                                             | Modify                | Refuse deactivated accounts with the generic message         |
+| `app/Http/Controllers/Auth/AuthenticatedSessionController.php`                                                                                                                                        | Modify                | Stamp `last_login_at`                                        |
+| `app/Http/Resources/UserResource.php`                                                                                                                                                                 | Create                | The only shape a user leaves the API in                      |
+| `app/Http/Controllers/CurrentUserController.php`                                                                                                                                                      | Create                | `GET /api/v1/me`                                             |
+| `app/Http/Controllers/CurrentUserPasswordController.php`, `app/Http/Requests/UpdateCurrentUserPasswordRequest.php`                                                                                    | Create                | `PUT /api/v1/me/password`                                    |
+| `app/Http/Middleware/EnsureUserIsActive.php`, `EnsurePasswordIsChanged.php`, `EnsureUserHasRole.php`                                                                                                  | Create                | `active`, `password.changed`, `role:`                        |
+| `app/Policies/UserPolicy.php`                                                                                                                                                                         | Create                | Staff management abilities                                   |
+| `app/Http/Controllers/Admin/StaffController.php`, `StaffPasswordController.php`                                                                                                                       | Create                | Staff API                                                    |
+| `app/Http/Requests/Admin/ListStaffRequest.php`, `StoreStaffRequest.php`, `UpdateStaffRequest.php`, `ResetStaffPasswordRequest.php`                                                                    | Create                | Staff validation + authorization                             |
+| `app/Console/Commands/CreateAdminCommand.php`                                                                                                                                                         | Create                | `php artisan app:create-admin`                               |
+| `routes/api.php`, `routes/auth.php`, `bootstrap/app.php`                                                                                                                                              | Modify                | Routes and middleware aliases                                |
+| `app/Http/Controllers/Auth/VerifyEmailController.php`, `EmailVerificationNotificationController.php`, `app/Http/Middleware/EnsureEmailIsVerified.php`, `tests/Feature/Auth/EmailVerificationTest.php` | **Delete** (approved) | Email verification is not used                               |
+| `database/seeders/DatabaseSeeder.php`                                                                                                                                                                 | Modify                | Demo staff in `local` only; no default admin                 |
+| `resources/views/app.blade.php`, `resources/js/app.tsx`                                                                                                                                               | Modify                | Expose the CSP nonce to Radix                                |
+| `resources/js/lib/http.ts`, `lib/auth.ts`, `lib/staff.ts`, `types/auth.ts`                                                                                                                            | Create/Replace        | API client, loaders, types                                   |
+| `resources/js/components/form-field.tsx`, `components/staff/*`                                                                                                                                        | Create                | Form + dialogs                                               |
+| `resources/js/pages/auth/login.tsx`, `pages/account/change-password.tsx`, `pages/admin/dashboard.tsx`, `pages/admin/staff.tsx`, `pages/route-error.tsx`, `layouts/admin-layout.tsx`                   | Create                | Screens                                                      |
+| `resources/js/router.tsx`                                                                                                                                                                             | Modify                | Routes + loaders                                             |
 
 ---
 
 ### Task 1: Roles and staff columns
 
 **Files:**
+
 - Create: `app/Enums/Role.php`, `database/migrations/2026_09_22_100000_add_staff_columns_to_users_table.php`, `tests/Feature/UserRolesTest.php`
 - Modify: `app/Models/User.php`, `database/factories/UserFactory.php`
 
 **Interfaces:**
+
 - Produces: `App\Enums\Role` (`Admin='admin'`, `Cashier='cashier'`, `Kitchen='kitchen'`, `label(): string`); `User::hasRole(Role ...$roles): bool`, `User::isAdmin(): bool`, `User::query()->active()`; factory states `admin()`, `cashier()`, `kitchen()`, `inactive()`, `mustChangePassword()`.
 
 - [ ] **Step 1: Write the failing test** — `tests/Feature/UserRolesTest.php`
@@ -314,9 +316,11 @@ Add `use App\Enums\Role;`. In `definition()` add `'role' => Role::Kitchen,`, `'i
 ### Task 2: Audit trail
 
 **Files:**
+
 - Create: `database/migrations/2026_09_22_100100_create_audit_logs_table.php`, `app/Models/AuditLog.php`, `tests/Feature/AuditLogTest.php`
 
 **Interfaces:**
+
 - Produces: `AuditLog::record(string $action, ?Model $subject = null, ?User $causer = null, array $context = [], array $changes = []): AuditLog` and `AuditLog::recordChange(string $action, Model $subject, ?User $causer = null): AuditLog`. The causer defaults to the signed-in user. Keys `password`, `password_confirmation`, `current_password`, `remember_token` and `token` are replaced by `[REDACTED]` at any depth.
 
 - [ ] **Step 1: Write the failing test** — `tests/Feature/AuditLogTest.php`
@@ -574,11 +578,13 @@ git commit -m "feat: add staff roles and audit log"
 ### Task 3: Login hardening, `/me`, and removing email verification
 
 **Files:**
+
 - Create: `app/Http/Resources/UserResource.php`, `app/Http/Controllers/CurrentUserController.php`, `app/Http/Middleware/EnsureUserIsActive.php`, `tests/Feature/Auth/StaffLoginTest.php`
 - Modify: `app/Http/Requests/Auth/LoginRequest.php`, `app/Http/Controllers/Auth/AuthenticatedSessionController.php`, `app/Providers/AppServiceProvider.php`, `routes/api.php`, `routes/auth.php`, `bootstrap/app.php`, `tests/Feature/SanctumSpaTest.php`, `tests/Feature/SecurityHeadersTest.php`, `tests/Feature/Auth/AuthHardeningTest.php`
 - Delete: `app/Http/Controllers/Auth/VerifyEmailController.php`, `app/Http/Controllers/Auth/EmailVerificationNotificationController.php`, `app/Http/Middleware/EnsureEmailIsVerified.php`, `tests/Feature/Auth/EmailVerificationTest.php`
 
 **Interfaces:**
+
 - Consumes: `AuditLog::record()` (Task 2), `User` helpers (Task 1).
 - Produces: `GET /api/v1/me` (name `me.show`) → `{ data: UserResource, abilities: { manage_staff: bool } }`; middleware alias `active`; `UserResource` fields `id, name, email, role, role_label, is_active, must_change_password, last_login_at, created_at`.
 
@@ -856,10 +862,12 @@ Add imports `App\Models\AuditLog`, `App\Models\User`, `Illuminate\Auth\Events\Fa
 ### Task 4: Authorization layers + staff list
 
 **Files:**
+
 - Create: `app/Policies/UserPolicy.php`, `app/Http/Middleware/EnsureUserHasRole.php`, `app/Http/Controllers/Admin/StaffController.php` (`index` only), `app/Http/Requests/Admin/ListStaffRequest.php`, `tests/Feature/Admin/StaffAuthorizationTest.php`
 - Modify: `app/Providers/AppServiceProvider.php`, `bootstrap/app.php`, `routes/api.php`
 
 **Interfaces:**
+
 - Produces: `GET /api/v1/admin/staff` (`admin.staff.index`), filters `search` (≤100 chars), `role`, `per_page` (1–50), `page`, returning `{ data: UserResource[], links, meta }` ordered by name. Middleware alias `role` (`role:admin`). `UserPolicy::viewAny|create|update`. `Gate::before` → `true` for active admins.
 
 - [ ] **Step 1: Write the failing test** — `tests/Feature/Admin/StaffAuthorizationTest.php`
@@ -1132,10 +1140,12 @@ git commit -m "feat: add /me, RBAC layers and staff list"
 ### Task 5: Staff management (add, edit, deactivate, reset password)
 
 **Files:**
+
 - Create: `app/Http/Requests/Admin/StoreStaffRequest.php`, `UpdateStaffRequest.php`, `ResetStaffPasswordRequest.php`, `app/Http/Controllers/Admin/StaffPasswordController.php`, `tests/Feature/Admin/StaffManagementTest.php`
 - Modify: `app/Http/Controllers/Admin/StaffController.php` (`store`, `update`), `routes/api.php`
 
 **Interfaces:**
+
 - Produces: `POST /api/v1/admin/staff` (201, `{data: UserResource}`), `PATCH /api/v1/admin/staff/{user}` (200), `PUT /api/v1/admin/staff/{user}/password` (204). New staff and reset passwords set `must_change_password = true`. Audit actions `staff.created`, `staff.updated` (with diff), `staff.password_reset`.
 
 - [ ] **Step 1: Write the failing test** — `tests/Feature/Admin/StaffManagementTest.php`
@@ -1576,10 +1586,12 @@ class StaffPasswordController extends Controller
 ### Task 6: Change your own password + the temporary-password gate
 
 **Files:**
+
 - Create: `app/Http/Requests/UpdateCurrentUserPasswordRequest.php`, `app/Http/Controllers/CurrentUserPasswordController.php`, `app/Http/Middleware/EnsurePasswordIsChanged.php`, `tests/Feature/Auth/PasswordChangeTest.php`
 - Modify: `routes/api.php`, `bootstrap/app.php`
 
 **Interfaces:**
+
 - Produces: `PUT /api/v1/me/password` (`me.password.update`, 204, `throttle:6,1`); middleware alias `password.changed`, which returns 403 `{message, code: "password_change_required"}`. Only `/me` and `/me/password` skip it.
 
 - [ ] **Step 1: Write the failing test** — `tests/Feature/Auth/PasswordChangeTest.php`
@@ -1797,10 +1809,12 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 ### Task 7: First admin from the console + safe seeding
 
 **Files:**
+
 - Create: `app/Console/Commands/CreateAdminCommand.php`, `tests/Feature/Console/CreateAdminCommandTest.php`
 - Modify: `database/seeders/DatabaseSeeder.php`
 
 **Interfaces:**
+
 - Produces: `php artisan app:create-admin`, which prompts for Name, Email, Password and Confirm password (never a CLI argument, so it stays out of shell history) and creates an active Admin with `must_change_password = false`, audited as `staff.created` with `via: console`.
 
 - [ ] **Step 1: Write the failing test** — `tests/Feature/Console/CreateAdminCommandTest.php`
@@ -1986,12 +2000,14 @@ git commit -m "feat: staff management API, password change gate, create-admin co
 ### Task 8: Frontend auth — API client, login, change password
 
 **Files:**
+
 - Create: `resources/js/lib/http.ts`, `resources/js/lib/auth.ts`, `resources/js/components/form-field.tsx`, `resources/js/pages/auth/login.tsx`, `resources/js/pages/account/change-password.tsx`, `resources/js/pages/route-error.tsx`
 - Replace: `resources/js/types/auth.ts`
 - Modify: `resources/views/app.blade.php`, `resources/js/app.tsx`, `resources/js/router.tsx`
 - shadcn: `input`, `label`, `alert` (+ `table`, `dialog`, `select`, `switch` for Task 9)
 
 **Interfaces:**
+
 - Produces: `http.get/post/put/patch<T>()` and `HttpError { status, body, errors }`; `fetchCurrentUser()`, `login()`, `logout()`, `changePassword()`; loaders `guestLoader`, `authLoader`, `staffLoader`; types `Role`, `StaffUser`, `Abilities`, `CurrentUser`, `Paginated<T>`; `<FormField id label error ...inputProps />`.
 
 - [ ] **Step 1: Add the shadcn components, then keep our own `cn`**
@@ -2021,7 +2037,9 @@ and in `resources/js/app.tsx`, add at the top (after the imports):
 ```tsx
 import { setNonce } from 'get-nonce';
 
-const cspNonce = document.querySelector<HTMLMetaElement>('meta[name="csp-nonce"]')?.content;
+const cspNonce = document.querySelector<HTMLMetaElement>(
+    'meta[name="csp-nonce"]',
+)?.content;
 
 if (cspNonce) {
     setNonce(cspNonce);
@@ -2352,7 +2370,9 @@ export default function Login() {
                     <CardTitle className="font-display text-2xl font-extrabold">
                         Staff login
                     </CardTitle>
-                    <CardDescription>For Barrio Bistro staff only.</CardDescription>
+                    <CardDescription>
+                        For Barrio Bistro staff only.
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form
@@ -2382,7 +2402,9 @@ export default function Login() {
                             type="password"
                             autoComplete="current-password"
                             value={password}
-                            onChange={(event) => setPassword(event.target.value)}
+                            onChange={(event) =>
+                                setPassword(event.target.value)
+                            }
                             error={errors.password?.[0]}
                             maxLength={255}
                             required
@@ -2495,7 +2517,9 @@ export default function ChangePassword() {
                             type="password"
                             autoComplete="new-password"
                             value={password}
-                            onChange={(event) => setPassword(event.target.value)}
+                            onChange={(event) =>
+                                setPassword(event.target.value)
+                            }
                             error={errors.password?.[0]}
                             minLength={12}
                             required
@@ -2590,10 +2614,12 @@ export const router = createBrowserRouter([
 ### Task 9: Admin layout + staff management screen
 
 **Files:**
+
 - Create: `resources/js/layouts/admin-layout.tsx`, `resources/js/pages/admin/dashboard.tsx`, `resources/js/pages/admin/staff.tsx`, `resources/js/lib/staff.ts`, `resources/js/components/staff/staff-form-dialog.tsx`, `resources/js/components/staff/reset-password-dialog.tsx`
 - Modify: `resources/js/router.tsx`
 
 **Interfaces:**
+
 - Consumes: `http`, `HttpError` (Task 8), `staffLoader` (Task 8), and the staff API (Task 5).
 - Produces: `/admin` (route id `admin`) and `/admin/staff`; `listStaff`, `createStaff`, `updateStaff`, `resetStaffPassword`, `staffPageLoader`.
 
@@ -2619,7 +2645,9 @@ export type StaffChanges = Partial<{
     is_active: boolean;
 }>;
 
-export function listStaff(query: URLSearchParams): Promise<Paginated<StaffUser>> {
+export function listStaff(
+    query: URLSearchParams,
+): Promise<Paginated<StaffUser>> {
     return http.get<Paginated<StaffUser>>(
         `/api/v1/admin/staff?${query.toString()}`,
     );
@@ -2633,7 +2661,10 @@ export function updateStaff(
     id: number,
     changes: StaffChanges,
 ): Promise<{ data: StaffUser }> {
-    return http.patch<{ data: StaffUser }>(`/api/v1/admin/staff/${id}`, changes);
+    return http.patch<{ data: StaffUser }>(
+        `/api/v1/admin/staff/${id}`,
+        changes,
+    );
 }
 
 export function resetStaffPassword(
@@ -2665,7 +2696,13 @@ export function staffPageLoader({
 - [ ] **Step 2: Create `resources/js/layouts/admin-layout.tsx`**
 
 ```tsx
-import { Link, NavLink, Outlet, useLoaderData, useNavigate } from 'react-router';
+import {
+    Link,
+    NavLink,
+    Outlet,
+    useLoaderData,
+    useNavigate,
+} from 'react-router';
 import { Button } from '@/components/ui/button';
 import { logout, type staffLoader } from '@/lib/auth';
 import { cn } from '@/lib/utils';
@@ -2718,7 +2755,9 @@ export default function AdminLayout() {
                 <div className="flex flex-col gap-2 text-sm md:mt-auto">
                     <div>
                         <p className="font-medium">{user.name}</p>
-                        <p className="text-muted-foreground">{user.role_label}</p>
+                        <p className="text-muted-foreground">
+                            {user.role_label}
+                        </p>
                     </div>
                     <Link to="/account/password" className="underline">
                         Change password
@@ -2880,7 +2919,9 @@ export function StaffFormDialog({
                 >
                     <DialogHeader>
                         <DialogTitle>
-                            {staff === null ? 'Add staff' : `Edit ${staff.name}`}
+                            {staff === null
+                                ? 'Add staff'
+                                : `Edit ${staff.name}`}
                         </DialogTitle>
                         <DialogDescription>
                             {staff === null
@@ -2936,14 +2977,19 @@ export function StaffFormDialog({
                             </SelectTrigger>
                             <SelectContent>
                                 {roleOptions.map((option) => (
-                                    <SelectItem key={option.value} value={option.value}>
+                                    <SelectItem
+                                        key={option.value}
+                                        value={option.value}
+                                    >
                                         {option.label}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                         {errors.role && (
-                            <p className="text-sm text-destructive">{errors.role[0]}</p>
+                            <p className="text-sm text-destructive">
+                                {errors.role[0]}
+                            </p>
                         )}
                     </div>
 
@@ -2954,7 +3000,9 @@ export function StaffFormDialog({
                                 label="Temporary password"
                                 type="password"
                                 value={password}
-                                onChange={(event) => setPassword(event.target.value)}
+                                onChange={(event) =>
+                                    setPassword(event.target.value)
+                                }
                                 error={errors.password?.[0]}
                                 autoComplete="new-password"
                                 minLength={12}
@@ -2976,7 +3024,9 @@ export function StaffFormDialog({
                     ) : (
                         <div className="grid gap-2">
                             <div className="flex items-center justify-between gap-4 rounded-md border p-3">
-                                <Label htmlFor="staff-active">Active account</Label>
+                                <Label htmlFor="staff-active">
+                                    Active account
+                                </Label>
                                 <Switch
                                     id="staff-active"
                                     checked={isActive}
@@ -2993,7 +3043,11 @@ export function StaffFormDialog({
                     )}
 
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose}>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={onClose}
+                        >
                             Cancel
                         </Button>
                         <Button type="submit" disabled={isSaving}>
@@ -3031,7 +3085,10 @@ type ResetPasswordDialogProps = {
     onClose: () => void;
 };
 
-export function ResetPasswordDialog({ staff, onClose }: ResetPasswordDialogProps) {
+export function ResetPasswordDialog({
+    staff,
+    onClose,
+}: ResetPasswordDialogProps) {
     const [password, setPassword] = useState('');
     const [passwordConfirmation, setPasswordConfirmation] = useState('');
     const [errors, setErrors] = useState<ValidationErrors>({});
@@ -3111,7 +3168,9 @@ export function ResetPasswordDialog({ staff, onClose }: ResetPasswordDialogProps
                             label="New temporary password"
                             type="password"
                             value={password}
-                            onChange={(event) => setPassword(event.target.value)}
+                            onChange={(event) =>
+                                setPassword(event.target.value)
+                            }
                             error={errors.password?.[0]}
                             autoComplete="new-password"
                             minLength={12}
@@ -3130,7 +3189,11 @@ export function ResetPasswordDialog({ staff, onClose }: ResetPasswordDialogProps
                             required
                         />
                         <DialogFooter>
-                            <Button type="button" variant="outline" onClick={onClose}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={onClose}
+                            >
                                 Cancel
                             </Button>
                             <Button type="submit" disabled={isSaving}>
@@ -3204,7 +3267,9 @@ export default function Staff() {
         <div className="flex flex-col gap-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h1 className="font-display text-3xl font-extrabold">Staff</h1>
+                    <h1 className="font-display text-3xl font-extrabold">
+                        Staff
+                    </h1>
                     <p className="text-sm text-muted-foreground">
                         {meta.total} accounts
                     </p>
@@ -3239,7 +3304,9 @@ export default function Staff() {
                             <TableHead>Role</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Last login</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead className="text-right">
+                                Actions
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -3260,7 +3327,9 @@ export default function Staff() {
                                 </TableCell>
                                 <TableCell>{member.email}</TableCell>
                                 <TableCell>
-                                    <Badge variant="secondary">{member.role_label}</Badge>
+                                    <Badge variant="secondary">
+                                        {member.role_label}
+                                    </Badge>
                                 </TableCell>
                                 <TableCell>
                                     {member.is_active ? (
@@ -3268,7 +3337,9 @@ export default function Staff() {
                                             Active
                                         </Badge>
                                     ) : (
-                                        <Badge variant="outline">Deactivated</Badge>
+                                        <Badge variant="outline">
+                                            Deactivated
+                                        </Badge>
                                     )}
                                 </TableCell>
                                 <TableCell>
@@ -3291,7 +3362,9 @@ export default function Staff() {
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
-                                                onClick={() => setResetting(member)}
+                                                onClick={() =>
+                                                    setResetting(member)
+                                                }
                                             >
                                                 Reset password
                                             </Button>
@@ -3430,7 +3503,7 @@ git commit -m "feat: staff login, change password, and staff management UI"
 - [ ] **Step 1:** `composer audit` and `npm audit --audit-level=high` → no advisories.
 - [ ] **Step 2:** `composer run test` → Pint, PHPStan and every Pest test pass. `npm run check && npm run types:check` → exit 0.
 - [ ] **Step 3:** `php artisan route:list --except-vendor -v` → every `api/v1` route shows `auth:sanctum` and `active`; every `api/v1/admin/*` route also shows `password.changed` and `role:admin`; no `register` or `verify-email` routes exist.
-- [ ] **Step 4:** Security review against `CLAUDE.md` → *Security Guidelines*: no `$request->all()`, no `$guarded = []`, no `{!! !!}`, no `whereRaw` with input (`grep -rn "request()->all\|->all()\|guarded = \[\]\|whereRaw\|{!!" app resources`).
+- [ ] **Step 4:** Security review against `CLAUDE.md` → _Security Guidelines_: no `$request->all()`, no `$guarded = []`, no `{!! !!}`, no `whereRaw` with input (`grep -rn "request()->all\|->all()\|guarded = \[\]\|whereRaw\|{!!" app resources`).
 - [ ] **Step 5: Final commit**
 
 ```bash

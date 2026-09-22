@@ -1,8 +1,39 @@
 import { createBrowserRouter } from 'react-router';
+import AdminLayout from '@/layouts/admin-layout';
+import { authLoader, guestLoader, staffLoader } from '@/lib/auth';
+import { staffPageLoader } from '@/lib/staff';
+import ChangePassword from '@/pages/account/change-password';
+import Dashboard from '@/pages/admin/dashboard';
+import Staff from '@/pages/admin/staff';
+import Login from '@/pages/auth/login';
 import Home from '@/pages/home';
 import NotFound from '@/pages/not-found';
+import RouteError from '@/pages/route-error';
 
 export const router = createBrowserRouter([
     { path: '/', element: <Home /> },
+    { path: '/login', element: <Login />, loader: guestLoader },
+    {
+        path: '/account/password',
+        element: <ChangePassword />,
+        loader: authLoader,
+        errorElement: <RouteError />,
+    },
+    {
+        id: 'admin',
+        path: '/admin',
+        element: <AdminLayout />,
+        loader: staffLoader,
+        errorElement: <RouteError />,
+        children: [
+            { index: true, element: <Dashboard /> },
+            {
+                path: 'staff',
+                element: <Staff />,
+                loader: staffPageLoader,
+                errorElement: <RouteError />,
+            },
+        ],
+    },
     { path: '*', element: <NotFound /> },
 ]);

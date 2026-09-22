@@ -1,14 +1,32 @@
-export type User = {
+export type Role = 'admin' | 'cashier' | 'kitchen';
+
+export type StaffUser = {
     id: number;
     name: string;
     email: string;
-    avatar?: string;
-    email_verified_at: string | null;
+    role: Role;
+    role_label: string;
+    is_active: boolean;
+    must_change_password: boolean;
+    last_login_at: string | null;
     created_at: string;
-    updated_at: string;
-    [key: string]: unknown; // This allows for additional properties...
 };
 
-export type Auth = {
-    user: User;
+export type Abilities = {
+    manage_staff: boolean;
+};
+
+export type CurrentUser = {
+    user: StaffUser;
+    abilities: Abilities;
+};
+
+export type Paginated<T> = {
+    data: T[];
+    meta: {
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
 };

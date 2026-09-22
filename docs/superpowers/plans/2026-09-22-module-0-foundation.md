@@ -21,7 +21,8 @@
 - Tests: Pest, feature tests in `tests/Feature`, run with `php artisan test --compact`.
 - After PHP edits: `vendor/bin/pint --dirty --format agent`.
 - Do not add dependencies beyond those named in this plan without approval.
-- Registration stays as Breeze installs it in this module. **Module 1** removes public `/register` (staff-only accounts) and adds a `UserResource` for `/api/v1/user`.
+- Public `/register` is removed in Task 4, because only an Admin creates staff accounts (Module 1). **Module 1** also adds a `UserResource` for `/api/v1/user`.
+- Security rules in `CLAUDE.md` → *Security Guidelines* apply to every task.
 
 ## File Map
 
@@ -44,6 +45,9 @@
 | `resources/js/pages/welcome.tsx`, `resources/js/actions/`, `resources/js/routes/`, `resources/js/wayfinder/` | Delete | Inertia/Wayfinder only |
 | `resources/js/types/global.d.ts` | Modify | Drop the Inertia module augmentation |
 | `vite.config.ts`, `package.json`, `pnpm-workspace.yaml` | Modify | Drop the Inertia/Wayfinder plugins and packages |
+| `app/Http/Middleware/SecurityHeaders.php`, `config/security.php` | Create | CSP (nonce), security headers, HSTS in production |
+| `tests/Feature/SecurityHeadersTest.php`, `tests/Feature/Auth/AuthHardeningTest.php` | Create | Security baseline contract |
+| `app/Http/Controllers/Auth/RegisteredUserController.php` | Delete | Public registration is closed |
 | `components.json` | Create | shadcn config |
 | `resources/css/app.css` | Replace | Bilao tokens mapped to shadcn variables |
 | `resources/js/components/ui/*` | Created by shadcn | Button, Card, Badge |
@@ -531,7 +535,470 @@ Expected: all tests PASS.
 
 ---
 
-### Task 4: shadcn/ui + Bilao theme
+### Task 4: Security baseline
+
+Closes the gaps Breeze leaves open and adds the defences that every later module relies on.
+
+| Threat | Defence in this task |
+|---|---|
+| Anyone creating a staff account | Public `/register` removed |
+| Credential stuffing across many emails | Per-IP `throttle:login` on top of Breeze's per-email+IP lock |
+| Account enumeration via "forgot password" | Same response whether or not the email exists |
+| API scraping / abuse | `throttleApi()`: 60 requests/min per user or IP |
+| XSS, clickjacking, MIME sniffing | `SecurityHeaders`: nonce-based CSP, `X-Frame-Options`, `nosniff`, HSTS in production |
+| Session theft from the DB / plaintext | Encrypted sessions, HttpOnly + SameSite=Lax cookie, Secure in production |
+| Mass assignment slipping through silently | `Model::shouldBeStrict()` outside production |
+| Weak passwords | `Password::min(12)`, plus `uncompromised()` in production |
+| Cached authenticated pages | `Cache-Control: no-store, private` when logged in |
+
+**Files:**
+- Create: `app/Http/Middleware/SecurityHeaders.php`, `config/security.php`, `tests/Feature/SecurityHeadersTest.php`, `tests/Feature/Auth/AuthHardeningTest.php`
+- Modify: `bootstrap/app.php`, `routes/auth.php`, `app/Providers/AppServiceProvider.php`, `app/Http/Controllers/Auth/PasswordResetLinkController.php`, `app/Http/Requests/Auth/LoginRequest.php`, `config/session.php`, `vite.config.ts`, `.env`, `.env.example`
+- Rewrite: `tests/Feature/Auth/RegistrationTest.php` (it now proves registration is closed)
+- Modify: `tests/Feature/Auth/PasswordResetTest.php` (12+ character password)
+- Delete: `app/Http/Controllers/Auth/RegisteredUserController.php`
+
+**Interfaces:**
+- Consumes: `spa` catch-all (Task 3), the Breeze auth routes (Task 2).
+- Produces: rate limiters `api` and `login`; middleware `App\Http\Middleware\SecurityHeaders` (global); config key `security.csp_report_only`.
+
+- [ ] **Step 1: Write the failing security header tests**
+
+`tests/Feature/SecurityHeadersTest.php`:
+
+```php
+<?php
+
+test('html responses carry a strict nonce-based content security policy', function () {
+    $first = $this->withoutVite()->get('/')->headers->get('Content-Security-Policy');
+    $second = $this->withoutVite()->get('/')->headers->get('Content-Security-Policy');
+
+    expect($first)->not->toBeNull()
+        ->and($first)->not->toBe($second)
+        ->and($first)->toContain("default-src 'self'")
+        ->and($first)->toContain("script-src 'self' 'nonce-")
+        ->and($first)->toContain("object-src 'none'")
+        ->and($first)->toContain("frame-ancestors 'none'")
+        ->and($first)->toContain("form-action 'self'")
+        ->and($first)->not->toContain("'unsafe-inline'")
+        ->and($first)->not->toContain("'unsafe-eval'");
+});
+
+test('every response carries the baseline security headers', function (string $uri) {
+    $this->withoutVite()
+        ->get($uri)
+        ->assertHeader('X-Content-Type-Options', 'nosniff')
+        ->assertHeader('X-Frame-Options', 'DENY')
+        ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+        ->assertHeader('Cross-Origin-Opener-Policy', 'same-origin');
+})->with(['/', '/api/v1/user']);
+
+test('json responses do not carry a content security policy', function () {
+    $this->getJson('/api/v1/user')->assertHeaderMissing('Content-Security-Policy');
+});
+
+test('hsts is not sent over plain http outside production', function () {
+    $this->withoutVite()->get('/')->assertHeaderMissing('Strict-Transport-Security');
+});
+
+test('the session cookie is http-only, same-site lax, and sessions are encrypted', function () {
+    $sessionCookie = collect($this->withoutVite()->get('/')->headers->getCookies())
+        ->first(fn ($cookie) => $cookie->getName() === config('session.cookie'));
+
+    expect($sessionCookie)->not->toBeNull()
+        ->and($sessionCookie->isHttpOnly())->toBeTrue()
+        ->and($sessionCookie->getSameSite())->toBe('lax')
+        ->and(config('session.encrypt'))->toBeTrue();
+});
+```
+
+- [ ] **Step 2: Write the failing auth hardening tests**
+
+`tests/Feature/Auth/AuthHardeningTest.php`:
+
+```php
+<?php
+
+use App\Models\User;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Database\Eloquent\MassAssignmentException;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
+
+test('password reset requests do not reveal whether an account exists', function () {
+    Notification::fake();
+    $user = User::factory()->create();
+
+    $known = $this->postJson('/forgot-password', ['email' => $user->email]);
+    $unknown = $this->postJson('/forgot-password', ['email' => 'nobody@example.com']);
+
+    $known->assertOk();
+    $unknown->assertOk();
+    expect($unknown->json())->toBe($known->json());
+    Notification::assertSentTo($user, ResetPassword::class);
+});
+
+test('login is throttled per ip even when every attempt uses a different email', function () {
+    foreach (range(1, 20) as $attempt) {
+        $this->postJson('/login', [
+            'email' => "guess{$attempt}@example.com",
+            'password' => 'wrong-password',
+        ])->assertUnprocessable();
+    }
+
+    $this->postJson('/login', [
+        'email' => 'guess21@example.com',
+        'password' => 'wrong-password',
+    ])->assertTooManyRequests();
+});
+
+test('the api is rate limited per client', function () {
+    foreach (range(1, 60) as $attempt) {
+        $this->getJson('/api/v1/user')->assertUnauthorized();
+    }
+
+    $this->getJson('/api/v1/user')->assertTooManyRequests();
+});
+
+test('passwords shorter than 12 characters are rejected', function () {
+    $validate = fn (string $password): bool => Validator::make(
+        ['password' => $password],
+        ['password' => Password::defaults()],
+    )->passes();
+
+    expect($validate('short-pass1'))->toBeFalse()
+        ->and($validate('a-long-enough-passphrase'))->toBeTrue();
+});
+
+test('unexpected attributes throw instead of being silently discarded', function () {
+    expect(fn () => new User(['name' => 'Juan', 'is_admin' => true]))
+        ->toThrow(MassAssignmentException::class);
+});
+```
+
+Rewrite `tests/Feature/Auth/RegistrationTest.php`:
+
+```php
+<?php
+
+test('public self-registration is closed', function () {
+    $this->postJson('/register', [
+        'name' => 'Intruder',
+        'email' => 'intruder@example.com',
+        'password' => 'a-long-enough-passphrase',
+        'password_confirmation' => 'a-long-enough-passphrase',
+    ])->assertMethodNotAllowed();
+
+    $this->assertGuest();
+    $this->assertDatabaseMissing('users', ['email' => 'intruder@example.com']);
+});
+```
+
+In `tests/Feature/Auth/PasswordResetTest.php`, in the `'password can be reset with valid token'` test, change both `'password' => 'password'` and `'password_confirmation' => 'password'` to `'a-long-enough-passphrase'`.
+
+- [ ] **Step 3: Run them to verify they fail**
+
+Run: `php artisan test --compact tests/Feature/SecurityHeadersTest.php tests/Feature/Auth`
+Expected: FAIL. There are no security headers yet, registration still succeeds (204), the unknown email returns 422, there are no 429s, `short-pass1` passes, and the mass-assignment test doesn't throw.
+
+- [ ] **Step 4: Create `config/security.php`**
+
+```php
+<?php
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Content Security Policy Report-Only Mode
+    |--------------------------------------------------------------------------
+    |
+    | When true, the CSP is sent as "Content-Security-Policy-Report-Only": the
+    | browser logs violations but blocks nothing. Use it only while rolling
+    | out a policy change, then switch back to enforcing mode.
+    |
+    */
+
+    'csp_report_only' => (bool) env('CSP_REPORT_ONLY', false),
+
+];
+```
+
+- [ ] **Step 5: Create `app/Http/Middleware/SecurityHeaders.php`**
+
+```php
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Vite;
+use Symfony\Component\HttpFoundation\Response;
+
+class SecurityHeaders
+{
+    /**
+     * Add security headers and a per-request nonce-based Content Security Policy.
+     *
+     * @param  Closure(Request): Response  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        $nonce = Vite::useCspNonce();
+
+        $response = $next($request);
+
+        $response->headers->add([
+            'X-Content-Type-Options' => 'nosniff',
+            'X-Frame-Options' => 'DENY',
+            'Referrer-Policy' => 'strict-origin-when-cross-origin',
+            'Permissions-Policy' => 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+            'Cross-Origin-Opener-Policy' => 'same-origin',
+            'X-Permitted-Cross-Domain-Policies' => 'none',
+        ]);
+
+        if ($request->secure() && app()->isProduction()) {
+            $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+        }
+
+        if (str_contains((string) $response->headers->get('Content-Type'), 'text/html')) {
+            $cspHeader = config('security.csp_report_only')
+                ? 'Content-Security-Policy-Report-Only'
+                : 'Content-Security-Policy';
+
+            $response->headers->set($cspHeader, $this->contentSecurityPolicy($nonce));
+        }
+
+        if ($request->user() !== null) {
+            $response->headers->set('Cache-Control', 'no-store, private');
+        }
+
+        return $response;
+    }
+
+    /**
+     * Build the policy; the local environment also allows the Vite dev server and its injected styles.
+     */
+    private function contentSecurityPolicy(string $nonce): string
+    {
+        $devServer = $this->viteDevServerUrl();
+        $devSources = $devServer === null ? '' : ' '.$devServer;
+        $devSocket = $devServer === null ? '' : ' '.preg_replace('/^http/', 'ws', $devServer);
+
+        $styleSources = $devServer === null
+            ? "'self' 'nonce-{$nonce}'"
+            : "'self' 'unsafe-inline'{$devSources}";
+
+        return implode('; ', array_filter([
+            "default-src 'self'",
+            "script-src 'self' 'nonce-{$nonce}' 'strict-dynamic'",
+            "style-src {$styleSources}",
+            "img-src 'self' data: blob:{$devSources}",
+            "font-src 'self' data:{$devSources}",
+            "connect-src 'self'{$devSources}{$devSocket}",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+            "frame-ancestors 'none'",
+            app()->isProduction() ? 'upgrade-insecure-requests' : null,
+        ]));
+    }
+
+    /**
+     * The Vite dev server origin, only when running locally with `npm run dev`.
+     */
+    private function viteDevServerUrl(): ?string
+    {
+        if (! app()->isLocal() || ! Vite::isRunningHot()) {
+            return null;
+        }
+
+        return rtrim(trim((string) file_get_contents(Vite::hotFile())), '/');
+    }
+}
+```
+
+- [ ] **Step 6: Register the middleware and API throttling in `bootstrap/app.php`**
+
+Add `use App\Http\Middleware\SecurityHeaders;` to the imports, then make the middleware closure:
+
+```php
+    ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(SecurityHeaders::class);
+
+        $middleware->statefulApi();
+        $middleware->throttleApi();
+
+        $middleware->web(append: [
+            AddLinkHeadersForPreloadedAssets::class,
+        ]);
+
+        $middleware->alias([
+            'verified' => EnsureEmailIsVerified::class,
+        ]);
+    })
+```
+
+- [ ] **Step 7: Harden `AppServiceProvider`**
+
+Replace `boot()` and `configureDefaults()`, and add `configureRateLimiting()`. The new imports are `Illuminate\Cache\RateLimiting\Limit`, `Illuminate\Database\Eloquent\Model`, `Illuminate\Http\Request` and `Illuminate\Support\Facades\RateLimiter`.
+
+```php
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        $this->configureDefaults();
+        $this->configureRateLimiting();
+
+        ResetPassword::createUrlUsing(function (object $notifiable, string $token): string {
+            return config('app.frontend_url')."/password-reset/{$token}?email={$notifiable->getEmailForPasswordReset()}";
+        });
+    }
+
+    /**
+     * Configure default behaviors for production-ready applications.
+     */
+    protected function configureDefaults(): void
+    {
+        Date::use(CarbonImmutable::class);
+
+        DB::prohibitDestructiveCommands(
+            app()->isProduction(),
+        );
+
+        Model::shouldBeStrict(! app()->isProduction());
+
+        Password::defaults(fn (): Password => app()->isProduction()
+            ? Password::min(12)->uncompromised()
+            : Password::min(12),
+        );
+    }
+
+    /**
+     * Define the rate limiters used by the API and the authentication routes.
+     */
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('api', fn (Request $request): Limit => Limit::perMinute(60)
+            ->by($request->user()?->getAuthIdentifier() ?: $request->ip()));
+
+        RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(20)
+            ->by($request->ip()));
+    }
+```
+
+- [ ] **Step 8: Close registration and throttle the auth routes in `routes/auth.php`**
+
+Delete the `use App\Http\Controllers\Auth\RegisteredUserController;` line and the whole `Route::post('/register', …)` block, then delete `app/Http/Controllers/Auth/RegisteredUserController.php`.
+Change the middleware of these three routes:
+
+```php
+Route::post('/login', [AuthenticatedSessionController::class, 'store'])
+    ->middleware(['guest', 'throttle:login'])
+    ->name('login');
+
+Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
+    ->middleware(['guest', 'throttle:login'])
+    ->name('password.email');
+
+Route::post('/reset-password', [NewPasswordController::class, 'store'])
+    ->middleware(['guest', 'throttle:login'])
+    ->name('password.store');
+```
+
+- [ ] **Step 9: Stop the password reset endpoint from leaking account existence**
+
+`app/Http/Controllers/Auth/PasswordResetLinkController.php`:
+
+```php
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
+
+class PasswordResetLinkController extends Controller
+{
+    /**
+     * Send a reset link if the email belongs to a staff account, answering identically either way.
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => ['required', 'string', 'email', 'max:255'],
+        ]);
+
+        Password::sendResetLink($request->only('email'));
+
+        return response()->json([
+            'status' => __('If that email belongs to a staff account, a reset link is on its way.'),
+        ]);
+    }
+}
+```
+
+In `app/Http/Requests/Auth/LoginRequest.php` → `rules()`, bound the inputs:
+
+```php
+        return [
+            'email' => ['required', 'string', 'email', 'max:255'],
+            'password' => ['required', 'string', 'max:255'],
+        ];
+```
+
+- [ ] **Step 10: Encrypt sessions by default**
+
+`config/session.php` line 50:
+
+```php
+    'encrypt' => env('SESSION_ENCRYPT', true),
+```
+
+In both `.env` and `.env.example`, set `SESSION_ENCRYPT=true`. Add these lines under it in `.env.example` only:
+
+```dotenv
+# Production: must be true (cookie only over HTTPS)
+SESSION_SECURE_COOKIE=
+```
+
+- [ ] **Step 11: Pin the Vite dev server to IPv4**
+
+CSP host sources can't express IPv6 literals like `[::1]`, so in `vite.config.ts`, add `host: '127.0.0.1',` as the first key inside `server: { … }`.
+
+- [ ] **Step 12: Run the tests**
+
+Run: `php artisan test --compact tests/Feature/SecurityHeadersTest.php tests/Feature/Auth`
+Expected: PASS.
+
+- [ ] **Step 13: Check the policy doesn't break the real page**
+
+Run: `composer run dev`, open `http://localhost:8000/`, and open DevTools → Console.
+Expected: the page renders, hot reload works, and there are **no** "Refused to load / execute … Content Security Policy" errors. If there are, copy the exact console line; don't loosen the policy blindly.
+
+- [ ] **Step 14: Review every route**
+
+Run: `php artisan route:list --except-vendor`
+Expected: no `register` route; `login`, `password.email` and `password.store` show `throttle:login`; the `api/v1/user` route shows `auth:sanctum`.
+
+- [ ] **Step 15: Full suite, format, commit**
+
+```bash
+php artisan test --compact
+vendor/bin/pint --dirty --format agent
+git add -A
+git commit -m "feat: security baseline - CSP and headers, rate limits, closed registration, encrypted sessions"
+```
+
+---
+
+### Task 5: shadcn/ui + Bilao theme
 
 **Files:**
 - Create: `components.json`
@@ -715,9 +1182,14 @@ git commit -m "feat: add shadcn/ui with Bilao theme tokens and display font"
 
 ---
 
-### Task 5: Module 0 gate
+### Task 6: Module 0 gate
 
 **Files:** none (verification only)
+
+- [ ] **Step 0: Scan dependencies for known vulnerabilities**
+
+Run: `composer audit`, then `npm audit --audit-level=high`
+Expected: no high or critical advisories. If any appear, stop and report them before continuing.
 
 - [ ] **Step 1: Run the project's full check**
 

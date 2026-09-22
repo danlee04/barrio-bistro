@@ -56,18 +56,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Frontend URL
-    |--------------------------------------------------------------------------
-    |
-    | The origin of the React SPA. It is used for password reset links and
-    | CORS. Laravel serves the SPA itself, so this matches the APP_URL.
-    |
-    */
-
-    'frontend_url' => env('FRONTEND_URL', env('APP_URL', 'http://localhost')),
-
-    /*
-    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

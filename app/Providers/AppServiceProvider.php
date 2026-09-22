@@ -9,10 +9,7 @@ use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
-use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
@@ -42,10 +39,6 @@ class AppServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
         $this->configureAuthorization();
         $this->configureAuditTrail();
-
-        ResetPassword::createUrlUsing(function (CanResetPassword $notifiable, string $token): string {
-            return config('app.frontend_url')."/password-reset/{$token}?email={$notifiable->getEmailForPasswordReset()}";
-        });
     }
 
     /**
@@ -110,12 +103,6 @@ class AppServiceProvider extends ServiceProvider
 
         Event::listen(function (Lockout $event): void {
             AuditLog::record('auth.lockout', context: ['email' => $event->request->input('email')]);
-        });
-
-        Event::listen(function (PasswordReset $event): void {
-            if ($event->user instanceof User) {
-                AuditLog::record('auth.password_reset', $event->user, $event->user);
-            }
         });
     }
 }

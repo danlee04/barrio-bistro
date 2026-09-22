@@ -1,24 +1,15 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Database\Eloquent\MassAssignmentException;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
-test('password reset requests do not reveal whether an account exists', function () {
-    Notification::fake();
+test('self-service password reset endpoints are gone because admins reset passwords', function (string $uri) {
     $user = User::factory()->create();
 
-    $known = $this->postJson('/forgot-password', ['email' => $user->email]);
-    $unknown = $this->postJson('/forgot-password', ['email' => 'nobody@example.com']);
-
-    $known->assertOk();
-    $unknown->assertOk();
-    expect($unknown->json())->toBe($known->json());
-    Notification::assertSentTo($user, ResetPassword::class);
-});
+    $this->postJson($uri, ['email' => $user->email])->assertMethodNotAllowed();
+})->with(['/forgot-password', '/reset-password']);
 
 test('login is throttled per ip even when every attempt uses a different email', function () {
     foreach (range(1, 20) as $attempt) {

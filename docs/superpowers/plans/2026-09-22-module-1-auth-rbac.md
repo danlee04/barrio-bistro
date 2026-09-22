@@ -20,6 +20,7 @@
 - A failed login never reveals whether the email exists or whether the account is deactivated. It always says `auth.failed`.
 - Passwords: `Password::defaults()` (min 12, `uncompromised()` in production). Never log or return a password.
 - Staff are never deleted (order history). Deactivate instead.
+- **No self-service password reset** (decided 2026-09-22). Breeze's `/forgot-password` and `/reset-password`, their controllers and `PasswordResetTest` were removed, and only an Admin resets passwords (Task 5). A test asserts both endpoints return 405.
 - Security rules in `CLAUDE.md` → _Security Guidelines_ apply to every task.
 - After PHP edits: `vendor/bin/pint --dirty --format agent`. Tests: `php artisan test --compact`.
 - New npm packages allowed in this module: the shadcn components (and the `radix-ui`/`lucide-react` they pull in), plus `get-nonce` (see Task 8). Nothing else.

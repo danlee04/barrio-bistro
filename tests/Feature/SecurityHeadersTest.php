@@ -15,6 +15,15 @@ test('html responses carry a strict nonce-based content security policy', functi
         ->and($first)->not->toContain("'unsafe-eval'");
 });
 
+test('the page shares the policy nonce so runtime-injected styles are allowed', function () {
+    $response = $this->withoutVite()->get('/');
+
+    preg_match("/'nonce-([^']+)'/", (string) $response->headers->get('Content-Security-Policy'), $policyNonce);
+
+    expect($policyNonce)->toHaveKey(1)
+        ->and($response->getContent())->toContain('<meta name="csp-nonce" content="'.$policyNonce[1].'">');
+});
+
 test('every response carries the baseline security headers', function (string $uri) {
     $this->withoutVite()
         ->get($uri)

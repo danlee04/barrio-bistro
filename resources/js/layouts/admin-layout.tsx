@@ -16,6 +16,12 @@ export default function AdminLayout() {
     const links = [
         { to: '/admin', label: 'Dashboard', end: true, visible: true },
         {
+            to: '/admin/menu',
+            label: 'Menu',
+            end: false,
+            visible: abilities.update_availability,
+        },
+        {
             to: '/admin/staff',
             label: 'Staff',
             end: false,

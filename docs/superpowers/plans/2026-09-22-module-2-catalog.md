@@ -22,28 +22,28 @@
 - Processing is synchronous by design: admin-only, rare, and bounded to 4096 px (~130 MB peak with GD). Revisit (queue it) if uploads become frequent. **Production needs `memory_limit` ≥ 256M** (track in Module 8).
 - Every catalog change is audited: create/update (with a price diff)/archive/restore/photo/availability.
 - New folder `app/Services` (approved by the user for `MenuPhotoProcessor`) and subfolder `app/Models/Concerns`.
-- Security rules in `CLAUDE.md` → *Security Guidelines* apply to every task.
+- Security rules in `CLAUDE.md` → _Security Guidelines_ apply to every task.
 
 ## File Map
 
-| File | Responsibility |
-|---|---|
-| `database/migrations/2026_09_22_200000_create_categories_table.php`, `…_200100_create_menu_items_table.php`, `…_200200_create_menu_item_sizes_table.php` | Schema |
-| `app/Models/Concerns/HasSortOrder.php` | `nextSortOrder()`, `moveInSortOrder()` |
-| `app/Models/Category.php`, `MenuItem.php`, `MenuItemSize.php` + factories | Catalog models |
-| `app/Models/AuditLog.php` | `recordChange()` gains `$extraChanges` (the price diff) |
-| `app/Http/Resources/CategoryResource.php`, `MenuItemResource.php`, `MenuItemSizeResource.php` | API shapes |
-| `app/Http/Controllers/PublicMenuController.php` | `GET /api/v1/menu` |
-| `app/Http/Controllers/Admin/CategoryController.php`, `MenuItemController.php`, `MenuItemPhotoController.php` | Admin catalog API |
-| `app/Http/Controllers/MenuItemAvailabilityController.php` | Staff sold-out toggle |
-| `app/Http/Requests/Admin/*Category*`, `*MenuItem*`, `MoveRequest.php`, `app/Http/Requests/UpdateMenuItemAvailabilityRequest.php` | Validation + authorization |
-| `app/Policies/CategoryPolicy.php`, `MenuItemPolicy.php` | Who may do what |
-| `app/Services/MenuPhotoProcessor.php` | GD pipeline: orient → square → 400/800 WebP |
-| `config/filesystems.php` | `public` disk URL becomes relative (`/storage`), so images match CSP `img-src 'self'` on any host |
-| `resources/js/lib/money.ts` + `money.test.ts` | Peso ⇄ centavos (unit-tested) |
-| `resources/js/lib/menu.ts`, `resources/js/types/menu.ts` | API client, loaders, types |
-| `resources/js/components/confirm-dialog.tsx`, `components/menu/*` | Shared UI |
-| `resources/js/pages/admin/menu/*.tsx` | Board, item form, categories, archived |
+| File                                                                                                                                                     | Responsibility                                                                                    |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `database/migrations/2026_09_22_200000_create_categories_table.php`, `…_200100_create_menu_items_table.php`, `…_200200_create_menu_item_sizes_table.php` | Schema                                                                                            |
+| `app/Models/Concerns/HasSortOrder.php`                                                                                                                   | `nextSortOrder()`, `moveInSortOrder()`                                                            |
+| `app/Models/Category.php`, `MenuItem.php`, `MenuItemSize.php` + factories                                                                                | Catalog models                                                                                    |
+| `app/Models/AuditLog.php`                                                                                                                                | `recordChange()` gains `$extraChanges` (the price diff)                                           |
+| `app/Http/Resources/CategoryResource.php`, `MenuItemResource.php`, `MenuItemSizeResource.php`                                                            | API shapes                                                                                        |
+| `app/Http/Controllers/PublicMenuController.php`                                                                                                          | `GET /api/v1/menu`                                                                                |
+| `app/Http/Controllers/Admin/CategoryController.php`, `MenuItemController.php`, `MenuItemPhotoController.php`                                             | Admin catalog API                                                                                 |
+| `app/Http/Controllers/MenuItemAvailabilityController.php`                                                                                                | Staff sold-out toggle                                                                             |
+| `app/Http/Requests/Admin/*Category*`, `*MenuItem*`, `MoveRequest.php`, `app/Http/Requests/UpdateMenuItemAvailabilityRequest.php`                         | Validation + authorization                                                                        |
+| `app/Policies/CategoryPolicy.php`, `MenuItemPolicy.php`                                                                                                  | Who may do what                                                                                   |
+| `app/Services/MenuPhotoProcessor.php`                                                                                                                    | GD pipeline: orient → square → 400/800 WebP                                                       |
+| `config/filesystems.php`                                                                                                                                 | `public` disk URL becomes relative (`/storage`), so images match CSP `img-src 'self'` on any host |
+| `resources/js/lib/money.ts` + `money.test.ts`                                                                                                            | Peso ⇄ centavos (unit-tested)                                                                     |
+| `resources/js/lib/menu.ts`, `resources/js/types/menu.ts`                                                                                                 | API client, loaders, types                                                                        |
+| `resources/js/components/confirm-dialog.tsx`, `components/menu/*`                                                                                        | Shared UI                                                                                         |
+| `resources/js/pages/admin/menu/*.tsx`                                                                                                                    | Board, item form, categories, archived                                                            |
 
 ---
 
@@ -2741,11 +2741,11 @@ export function centavosToInput(centavos: number): string {
 - [ ] **Step 7: `http.ts` — DELETE and file uploads.** Change `type Method` to include `'DELETE'`. In `send()`, replace the body/Content-Type handling with:
 
 ```ts
-    const isFormData = body instanceof FormData;
+const isFormData = body instanceof FormData;
 
-    if (body !== undefined && !isFormData) {
-        headers['Content-Type'] = 'application/json';
-    }
+if (body !== undefined && !isFormData) {
+    headers['Content-Type'] = 'application/json';
+}
 ```
 
 and the `fetch` body line with:
@@ -2856,7 +2856,10 @@ export function createCategory(input: CategoryInput) {
 }
 
 export function updateCategory(id: number, input: CategoryInput) {
-    return http.patch<Wrapped<Category>>(`/api/v1/admin/categories/${id}`, input);
+    return http.patch<Wrapped<Category>>(
+        `/api/v1/admin/categories/${id}`,
+        input,
+    );
 }
 
 export function archiveCategory(id: number) {
@@ -2864,15 +2867,21 @@ export function archiveCategory(id: number) {
 }
 
 export function restoreCategory(id: number) {
-    return http.post<Wrapped<Category>>(`/api/v1/admin/categories/${id}/restore`);
+    return http.post<Wrapped<Category>>(
+        `/api/v1/admin/categories/${id}/restore`,
+    );
 }
 
 export function moveCategory(id: number, direction: Direction) {
-    return http.post<void>(`/api/v1/admin/categories/${id}/move`, { direction });
+    return http.post<void>(`/api/v1/admin/categories/${id}/move`, {
+        direction,
+    });
 }
 
 export async function getMenuItem(id: number): Promise<MenuItem> {
-    const response = await http.get<Wrapped<MenuItem>>(`/api/v1/admin/menu-items/${id}`);
+    const response = await http.get<Wrapped<MenuItem>>(
+        `/api/v1/admin/menu-items/${id}`,
+    );
 
     return response.data;
 }
@@ -2882,7 +2891,10 @@ export function createMenuItem(input: MenuItemInput) {
 }
 
 export function updateMenuItem(id: number, input: MenuItemInput) {
-    return http.patch<Wrapped<MenuItem>>(`/api/v1/admin/menu-items/${id}`, input);
+    return http.patch<Wrapped<MenuItem>>(
+        `/api/v1/admin/menu-items/${id}`,
+        input,
+    );
 }
 
 export function archiveMenuItem(id: number) {
@@ -2890,28 +2902,40 @@ export function archiveMenuItem(id: number) {
 }
 
 export function restoreMenuItem(id: number) {
-    return http.post<Wrapped<MenuItem>>(`/api/v1/admin/menu-items/${id}/restore`);
+    return http.post<Wrapped<MenuItem>>(
+        `/api/v1/admin/menu-items/${id}/restore`,
+    );
 }
 
 export function moveMenuItem(id: number, direction: Direction) {
-    return http.post<void>(`/api/v1/admin/menu-items/${id}/move`, { direction });
+    return http.post<void>(`/api/v1/admin/menu-items/${id}/move`, {
+        direction,
+    });
 }
 
 export function uploadMenuItemPhoto(id: number, photo: File) {
     const form = new FormData();
     form.append('photo', photo);
 
-    return http.post<Wrapped<MenuItem>>(`/api/v1/admin/menu-items/${id}/photo`, form);
+    return http.post<Wrapped<MenuItem>>(
+        `/api/v1/admin/menu-items/${id}/photo`,
+        form,
+    );
 }
 
 export function removeMenuItemPhoto(id: number) {
-    return http.delete<Wrapped<MenuItem>>(`/api/v1/admin/menu-items/${id}/photo`);
+    return http.delete<Wrapped<MenuItem>>(
+        `/api/v1/admin/menu-items/${id}/photo`,
+    );
 }
 
 export function setMenuItemAvailability(id: number, isAvailable: boolean) {
-    return http.patch<Wrapped<MenuItem>>(`/api/v1/menu-items/${id}/availability`, {
-        is_available: isAvailable,
-    });
+    return http.patch<Wrapped<MenuItem>>(
+        `/api/v1/menu-items/${id}/availability`,
+        {
+            is_available: isAvailable,
+        },
+    );
 }
 
 export async function listArchivedMenuItems(): Promise<MenuItem[]> {
@@ -2930,10 +2954,15 @@ export function menuBoardLoader(): Promise<MenuCategory[]> {
 /** Loader: categories for the form, plus the item when editing. */
 export async function menuItemFormLoader({
     params,
-}: LoaderFunctionArgs): Promise<{ categories: Category[]; item: MenuItem | null }> {
+}: LoaderFunctionArgs): Promise<{
+    categories: Category[];
+    item: MenuItem | null;
+}> {
     const [categories, item] = await Promise.all([
         listCategories(),
-        params.itemId ? getMenuItem(Number(params.itemId)) : Promise.resolve(null),
+        params.itemId
+            ? getMenuItem(Number(params.itemId))
+            : Promise.resolve(null),
     ]);
 
     return { categories, item };
@@ -3101,7 +3130,10 @@ type AvailabilitySwitchProps = {
     onChanged: () => void;
 };
 
-export function AvailabilitySwitch({ item, onChanged }: AvailabilitySwitchProps) {
+export function AvailabilitySwitch({
+    item,
+    onChanged,
+}: AvailabilitySwitchProps) {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const id = `available-${item.id}`;
@@ -3152,7 +3184,12 @@ export function AvailabilitySwitch({ item, onChanged }: AvailabilitySwitchProps)
 ```tsx
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useLoaderData, useRevalidator, useRouteLoaderData } from 'react-router';
+import {
+    Link,
+    useLoaderData,
+    useRevalidator,
+    useRouteLoaderData,
+} from 'react-router';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { AvailabilitySwitch } from '@/components/menu/availability-switch';
 import { PlateThumb } from '@/components/menu/plate-thumb';
@@ -3194,7 +3231,9 @@ export default function MenuBoard() {
         <div className="flex flex-col gap-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h1 className="font-display text-3xl font-extrabold">Menu</h1>
+                    <h1 className="font-display text-3xl font-extrabold">
+                        Menu
+                    </h1>
                     <p className="text-sm text-muted-foreground">
                         {canManage
                             ? 'Manage dishes, prices and what is sold out.'
@@ -3225,7 +3264,8 @@ export default function MenuBoard() {
             {categories.length === 0 && (
                 <p className="text-muted-foreground">
                     No menu items yet.
-                    {canManage && ' Add a category first, then add items to it.'}
+                    {canManage &&
+                        ' Add a category first, then add items to it.'}
                 </p>
             )}
 
@@ -3266,7 +3306,10 @@ export default function MenuBoard() {
                                             .join(' · ')}
                                     </p>
                                 </div>
-                                <AvailabilitySwitch item={item} onChanged={refresh} />
+                                <AvailabilitySwitch
+                                    item={item}
+                                    onChanged={refresh}
+                                />
                                 {canManage && (
                                     <div className="flex items-center gap-1">
                                         <Button
@@ -3274,7 +3317,9 @@ export default function MenuBoard() {
                                             variant="ghost"
                                             aria-label={`Move ${item.name} up`}
                                             disabled={index === 0}
-                                            onClick={() => void handleMove(item, 'up')}
+                                            onClick={() =>
+                                                void handleMove(item, 'up')
+                                            }
                                         >
                                             <ChevronUpIcon />
                                         </Button>
@@ -3282,13 +3327,24 @@ export default function MenuBoard() {
                                             size="icon-sm"
                                             variant="ghost"
                                             aria-label={`Move ${item.name} down`}
-                                            disabled={index === category.items.length - 1}
-                                            onClick={() => void handleMove(item, 'down')}
+                                            disabled={
+                                                index ===
+                                                category.items.length - 1
+                                            }
+                                            onClick={() =>
+                                                void handleMove(item, 'down')
+                                            }
                                         >
                                             <ChevronDownIcon />
                                         </Button>
-                                        <Button size="sm" variant="outline" asChild>
-                                            <Link to={`/admin/menu/items/${item.id}/edit`}>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            asChild
+                                        >
+                                            <Link
+                                                to={`/admin/menu/items/${item.id}/edit`}
+                                            >
                                                 Edit
                                             </Link>
                                         </Button>
@@ -3472,7 +3528,9 @@ export function PhotoField({ item, onChanged }: PhotoFieldProps) {
                         disabled={!file || isWorking}
                         onClick={() => {
                             if (file) {
-                                void run(() => uploadMenuItemPhoto(item.id, file));
+                                void run(() =>
+                                    uploadMenuItemPhoto(item.id, file),
+                                );
                             }
                         }}
                     >
@@ -3483,7 +3541,9 @@ export function PhotoField({ item, onChanged }: PhotoFieldProps) {
                             type="button"
                             variant="outline"
                             disabled={isWorking}
-                            onClick={() => void run(() => removeMenuItemPhoto(item.id))}
+                            onClick={() =>
+                                void run(() => removeMenuItemPhoto(item.id))
+                            }
                         >
                             Remove photo
                         </Button>
@@ -3553,7 +3613,11 @@ export default function MenuItemFormPage() {
     const { categories, item } = useLoaderData<typeof menuItemFormLoader>();
 
     return (
-        <MenuItemForm key={item?.id ?? 'new'} categories={categories} item={item} />
+        <MenuItemForm
+            key={item?.id ?? 'new'}
+            categories={categories}
+            item={item}
+        />
     );
 }
 
@@ -3568,7 +3632,9 @@ function MenuItemForm({
     const revalidator = useRevalidator();
     const [searchParams] = useSearchParams();
     const [name, setName] = useState(item?.name ?? '');
-    const [categoryId, setCategoryId] = useState(item ? String(item.category_id) : '');
+    const [categoryId, setCategoryId] = useState(
+        item ? String(item.category_id) : '',
+    );
     const [description, setDescription] = useState(item?.description ?? '');
     const [isFeatured, setIsFeatured] = useState(item?.is_featured ?? false);
     const [sizes, setSizes] = useState<SizeRow[]>(() =>
@@ -3635,7 +3701,9 @@ function MenuItemForm({
         try {
             if (item === null) {
                 const created = await createMenuItem(payload);
-                await navigate(`/admin/menu/items/${created.data.id}/edit?created=1`);
+                await navigate(
+                    `/admin/menu/items/${created.data.id}/edit?created=1`,
+                );
             } else {
                 await updateMenuItem(item.id, payload);
                 await navigate('/admin/menu');
@@ -3669,7 +3737,8 @@ function MenuItemForm({
             {searchParams.get('created') === '1' && (
                 <Alert>
                     <AlertDescription>
-                        Saved. Add a photo below so it shows as a plate on the menu.
+                        Saved. Add a photo below so it shows as a plate on the
+                        menu.
                     </AlertDescription>
                 </Alert>
             )}
@@ -3701,16 +3770,26 @@ function MenuItemForm({
 
                         <div className="grid gap-2">
                             <Label htmlFor="item-category">Category</Label>
-                            <Select value={categoryId} onValueChange={setCategoryId}>
+                            <Select
+                                value={categoryId}
+                                onValueChange={setCategoryId}
+                            >
                                 <SelectTrigger
                                     id="item-category"
-                                    aria-invalid={fieldError('category_id') ? true : undefined}
+                                    aria-invalid={
+                                        fieldError('category_id')
+                                            ? true
+                                            : undefined
+                                    }
                                 >
                                     <SelectValue placeholder="Choose a category" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {categories.map((category) => (
-                                        <SelectItem key={category.id} value={String(category.id)}>
+                                        <SelectItem
+                                            key={category.id}
+                                            value={String(category.id)}
+                                        >
                                             {category.name}
                                         </SelectItem>
                                     ))}
@@ -3724,14 +3803,20 @@ function MenuItemForm({
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="item-description">Description</Label>
+                            <Label htmlFor="item-description">
+                                Description
+                            </Label>
                             <Textarea
                                 id="item-description"
                                 value={description}
-                                onChange={(event) => setDescription(event.target.value)}
+                                onChange={(event) =>
+                                    setDescription(event.target.value)
+                                }
                                 maxLength={500}
                                 rows={3}
-                                aria-invalid={fieldError('description') ? true : undefined}
+                                aria-invalid={
+                                    fieldError('description') ? true : undefined
+                                }
                             />
                             {fieldError('description') && (
                                 <p className="text-sm text-destructive">
@@ -3741,7 +3826,9 @@ function MenuItemForm({
                         </div>
 
                         <fieldset className="grid gap-3">
-                            <legend className="text-sm font-medium">Sizes and prices</legend>
+                            <legend className="text-sm font-medium">
+                                Sizes and prices
+                            </legend>
                             <p className="text-sm text-muted-foreground">
                                 Keep one row if the item has a single price.
                             </p>
@@ -3756,17 +3843,25 @@ function MenuItemForm({
                                             placeholder="Regular"
                                             value={row.name}
                                             onChange={(event) =>
-                                                updateRow(row.key, { name: event.target.value })
+                                                updateRow(row.key, {
+                                                    name: event.target.value,
+                                                })
                                             }
                                             maxLength={40}
                                             required
                                             aria-invalid={
-                                                fieldError(`sizes.${index}.name`) ? true : undefined
+                                                fieldError(
+                                                    `sizes.${index}.name`,
+                                                )
+                                                    ? true
+                                                    : undefined
                                             }
                                         />
                                         {fieldError(`sizes.${index}.name`) && (
                                             <p className="text-sm text-destructive">
-                                                {fieldError(`sizes.${index}.name`)}
+                                                {fieldError(
+                                                    `sizes.${index}.name`,
+                                                )}
                                             </p>
                                         )}
                                     </div>
@@ -3777,16 +3872,24 @@ function MenuItemForm({
                                             placeholder="125.00"
                                             value={row.price}
                                             onChange={(event) =>
-                                                updateRow(row.key, { price: event.target.value })
+                                                updateRow(row.key, {
+                                                    price: event.target.value,
+                                                })
                                             }
                                             required
                                             aria-invalid={
-                                                fieldError(`sizes.${index}.price`) ? true : undefined
+                                                fieldError(
+                                                    `sizes.${index}.price`,
+                                                )
+                                                    ? true
+                                                    : undefined
                                             }
                                         />
                                         {fieldError(`sizes.${index}.price`) && (
                                             <p className="text-sm text-destructive">
-                                                {fieldError(`sizes.${index}.price`)}
+                                                {fieldError(
+                                                    `sizes.${index}.price`,
+                                                )}
                                             </p>
                                         )}
                                     </div>
@@ -3798,7 +3901,11 @@ function MenuItemForm({
                                         disabled={sizes.length === 1}
                                         onClick={() =>
                                             setSizes((rows) =>
-                                                rows.filter((candidate) => candidate.key !== row.key),
+                                                rows.filter(
+                                                    (candidate) =>
+                                                        candidate.key !==
+                                                        row.key,
+                                                ),
                                             )
                                         }
                                     >
@@ -3807,7 +3914,9 @@ function MenuItemForm({
                                 </div>
                             ))}
                             {fieldError('sizes') && (
-                                <p className="text-sm text-destructive">{fieldError('sizes')}</p>
+                                <p className="text-sm text-destructive">
+                                    {fieldError('sizes')}
+                                </p>
                             )}
                             <Button
                                 type="button"
@@ -3815,7 +3924,9 @@ function MenuItemForm({
                                 size="sm"
                                 className="w-fit"
                                 disabled={sizes.length >= 6}
-                                onClick={() => setSizes((rows) => [...rows, newRow()])}
+                                onClick={() =>
+                                    setSizes((rows) => [...rows, newRow()])
+                                }
                             >
                                 Add size
                             </Button>
@@ -3832,7 +3943,11 @@ function MenuItemForm({
                             />
                         </div>
 
-                        <Button type="submit" className="w-fit" disabled={isSaving}>
+                        <Button
+                            type="submit"
+                            className="w-fit"
+                            disabled={isSaving}
+                        >
                             {isSaving ? 'Saving…' : 'Save item'}
                         </Button>
                     </form>
@@ -3840,7 +3955,10 @@ function MenuItemForm({
             </Card>
 
             {item !== null && (
-                <PhotoField item={item} onChanged={() => void revalidator.revalidate()} />
+                <PhotoField
+                    item={item}
+                    onChanged={() => void revalidator.revalidate()}
+                />
             )}
         </div>
     );
@@ -3960,7 +4078,9 @@ export function CategoryFormDialog({
                 >
                     <DialogHeader>
                         <DialogTitle>
-                            {category === null ? 'Add category' : `Edit ${category.name}`}
+                            {category === null
+                                ? 'Add category'
+                                : `Edit ${category.name}`}
                         </DialogTitle>
                     </DialogHeader>
                     {formError && (
@@ -3986,7 +4106,11 @@ export function CategoryFormDialog({
                         maxLength={255}
                     />
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose}>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={onClose}
+                        >
                             Cancel
                         </Button>
                         <Button type="submit" disabled={isSaving}>
@@ -4055,12 +4179,16 @@ export default function Categories() {
     return (
         <div className="flex max-w-3xl flex-col gap-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
-                <h1 className="font-display text-3xl font-extrabold">Categories</h1>
+                <h1 className="font-display text-3xl font-extrabold">
+                    Categories
+                </h1>
                 <div className="flex gap-2">
                     <Button asChild variant="outline">
                         <Link to="/admin/menu">Back to menu</Link>
                     </Button>
-                    <Button onClick={() => setIsCreating(true)}>Add category</Button>
+                    <Button onClick={() => setIsCreating(true)}>
+                        Add category
+                    </Button>
                 </div>
             </div>
 
@@ -4076,7 +4204,9 @@ export default function Categories() {
                         <TableRow>
                             <TableHead>Name</TableHead>
                             <TableHead>Items</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            <TableHead className="text-right">
+                                Actions
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -4086,14 +4216,19 @@ export default function Categories() {
                                     colSpan={3}
                                     className="py-8 text-center text-muted-foreground"
                                 >
-                                    No categories yet. Add Meals, Snacks, Drinks…
+                                    No categories yet. Add Meals, Snacks,
+                                    Drinks…
                                 </TableCell>
                             </TableRow>
                         )}
                         {active.map((category, index) => (
                             <TableRow key={category.id}>
-                                <TableCell className="font-medium">{category.name}</TableCell>
-                                <TableCell>{category.items_count ?? 0}</TableCell>
+                                <TableCell className="font-medium">
+                                    {category.name}
+                                </TableCell>
+                                <TableCell>
+                                    {category.items_count ?? 0}
+                                </TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex justify-end gap-1">
                                         <Button
@@ -4102,7 +4237,12 @@ export default function Categories() {
                                             aria-label={`Move ${category.name} up`}
                                             disabled={index === 0}
                                             onClick={() =>
-                                                void run(() => moveCategory(category.id, 'up'))
+                                                void run(() =>
+                                                    moveCategory(
+                                                        category.id,
+                                                        'up',
+                                                    ),
+                                                )
                                             }
                                         >
                                             <ChevronUpIcon />
@@ -4111,9 +4251,16 @@ export default function Categories() {
                                             size="icon-sm"
                                             variant="ghost"
                                             aria-label={`Move ${category.name} down`}
-                                            disabled={index === active.length - 1}
+                                            disabled={
+                                                index === active.length - 1
+                                            }
                                             onClick={() =>
-                                                void run(() => moveCategory(category.id, 'down'))
+                                                void run(() =>
+                                                    moveCategory(
+                                                        category.id,
+                                                        'down',
+                                                    ),
+                                                )
                                             }
                                         >
                                             <ChevronDownIcon />
@@ -4128,7 +4275,9 @@ export default function Categories() {
                                         <Button
                                             size="sm"
                                             variant="ghost"
-                                            onClick={() => setArchiving(category)}
+                                            onClick={() =>
+                                                setArchiving(category)
+                                            }
                                         >
                                             Archive
                                         </Button>
@@ -4141,8 +4290,14 @@ export default function Categories() {
             </div>
 
             {archived.length > 0 && (
-                <section className="flex flex-col gap-3" aria-labelledby="archived-categories">
-                    <h2 id="archived-categories" className="font-display text-xl font-extrabold">
+                <section
+                    className="flex flex-col gap-3"
+                    aria-labelledby="archived-categories"
+                >
+                    <h2
+                        id="archived-categories"
+                        className="font-display text-xl font-extrabold"
+                    >
                         Archived
                     </h2>
                     <ul className="divide-y rounded-lg border bg-card">
@@ -4155,7 +4310,11 @@ export default function Categories() {
                                 <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => void run(() => restoreCategory(category.id))}
+                                    onClick={() =>
+                                        void run(() =>
+                                            restoreCategory(category.id),
+                                        )
+                                    }
                                 >
                                     Restore
                                 </Button>
@@ -4208,7 +4367,9 @@ import { Button } from '@/components/ui/button';
 import { HttpError } from '@/lib/http';
 import { restoreMenuItem, type archivedItemsLoader } from '@/lib/menu';
 
-const archivedFormat = new Intl.DateTimeFormat('en-PH', { dateStyle: 'medium' });
+const archivedFormat = new Intl.DateTimeFormat('en-PH', {
+    dateStyle: 'medium',
+});
 
 export default function ArchivedItems() {
     const items = useLoaderData<typeof archivedItemsLoader>();
@@ -4233,7 +4394,9 @@ export default function ArchivedItems() {
     return (
         <div className="flex max-w-3xl flex-col gap-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
-                <h1 className="font-display text-3xl font-extrabold">Archived items</h1>
+                <h1 className="font-display text-3xl font-extrabold">
+                    Archived items
+                </h1>
                 <Button asChild variant="outline">
                     <Link to="/admin/menu">Back to menu</Link>
                 </Button>
@@ -4250,7 +4413,10 @@ export default function ArchivedItems() {
             ) : (
                 <ul className="divide-y rounded-lg border bg-card">
                     {items.map((item) => (
-                        <li key={item.id} className="flex flex-wrap items-center gap-4 p-3">
+                        <li
+                            key={item.id}
+                            className="flex flex-wrap items-center gap-4 p-3"
+                        >
                             <PlateThumb item={item} />
                             <div className="min-w-0 flex-1">
                                 <p className="font-medium">{item.name}</p>
@@ -4296,12 +4462,12 @@ export default function ArchivedItems() {
 - [ ] **Step 5: Verify** — `npm run test`, `npm run types:check`, `npm run check`, `npm run build`.
 
 - [ ] **Step 6: Browser walkthrough** (`composer run dev`, after `php artisan storage:link`):
-  1. As admin: **Menu → Categories** → add Meals, Snacks, Drinks; move Drinks up/down.
-  2. **Add item**: "Iced Coffee" in Drinks with sizes 12oz `90` and 16oz `110.50`, then a bad price (`12.345`) → inline error.
-  3. You land on the edit page → upload a phone photo (portrait) → it shows upright, as a circle.
-  4. Back on the Menu: the prices show as ₱90.00 · ₱110.50; flip **Available** → "Ubos na".
-  5. Log in as a kitchen/cashier demo account: **Menu** shows only the switches (no Edit/Archive/Add).
-  6. Archive an item → it appears under **Archived** → Restore.
+    1. As admin: **Menu → Categories** → add Meals, Snacks, Drinks; move Drinks up/down.
+    2. **Add item**: "Iced Coffee" in Drinks with sizes 12oz `90` and 16oz `110.50`, then a bad price (`12.345`) → inline error.
+    3. You land on the edit page → upload a phone photo (portrait) → it shows upright, as a circle.
+    4. Back on the Menu: the prices show as ₱90.00 · ₱110.50; flip **Available** → "Ubos na".
+    5. Log in as a kitchen/cashier demo account: **Menu** shows only the switches (no Edit/Archive/Add).
+    6. Archive an item → it appears under **Archived** → Restore.
 
 - [ ] **Step 7: Checkpoint commit**
 

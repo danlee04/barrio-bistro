@@ -23,7 +23,7 @@ export class HttpError extends Error {
     }
 }
 
-type Method = 'GET' | 'POST' | 'PUT' | 'PATCH';
+type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 function readCookie(name: string): string | null {
     const prefix = `${name}=`;
@@ -68,7 +68,9 @@ async function send<T>(
         'X-Requested-With': 'XMLHttpRequest',
     };
 
-    if (body !== undefined) {
+    const isFormData = body instanceof FormData;
+
+    if (body !== undefined && !isFormData) {
         headers['Content-Type'] = 'application/json';
     }
 
@@ -82,7 +84,12 @@ async function send<T>(
         method,
         headers,
         credentials: 'same-origin',
-        body: body === undefined ? undefined : JSON.stringify(body),
+        body:
+            body === undefined
+                ? undefined
+                : isFormData
+                  ? body
+                  : JSON.stringify(body),
     });
 
     if (response.status === 419 && !isRetry) {
@@ -111,4 +118,5 @@ export const http = {
     post: <T>(url: string, body?: unknown) => send<T>('POST', url, body),
     put: <T>(url: string, body?: unknown) => send<T>('PUT', url, body),
     patch: <T>(url: string, body?: unknown) => send<T>('PATCH', url, body),
+    delete: <T>(url: string) => send<T>('DELETE', url),
 };

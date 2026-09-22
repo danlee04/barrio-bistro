@@ -22,10 +22,10 @@ test('every response carries the baseline security headers', function (string $u
         ->assertHeader('X-Frame-Options', 'DENY')
         ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
         ->assertHeader('Cross-Origin-Opener-Policy', 'same-origin');
-})->with(['/', '/api/v1/user']);
+})->with(['/', '/api/v1/me']);
 
 test('json responses do not carry a content security policy', function () {
-    $this->getJson('/api/v1/user')->assertHeaderMissing('Content-Security-Policy');
+    $this->getJson('/api/v1/me')->assertHeaderMissing('Content-Security-Policy');
 });
 
 test('hsts is not sent over plain http outside production', function () {

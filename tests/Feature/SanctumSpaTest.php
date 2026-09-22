@@ -9,7 +9,7 @@ test('the csrf cookie endpoint issues an XSRF-TOKEN cookie', function () {
 });
 
 test('guests cannot read the current user from the api', function () {
-    $this->getJson('/api/v1/user')->assertUnauthorized();
+    $this->getJson('/api/v1/me')->assertUnauthorized();
 });
 
 test('staff can log in through the spa and read their profile from the api', function () {
@@ -23,11 +23,17 @@ test('staff can log in through the spa and read their profile from the api', fun
         ->assertNoContent();
 
     $this->withHeader('Referer', config('app.url'))
-        ->getJson('/api/v1/user')
+        ->getJson('/api/v1/me')
         ->assertOk()
-        ->assertJsonPath('email', $user->email);
+        ->assertJsonPath('data.email', $user->email);
 });
 
 test('the old unversioned api path is not served', function () {
     $this->getJson('/api/user')->assertNotFound();
+});
+
+test('the pre-module-1 user endpoint is gone', function () {
+    $this->actingAs(User::factory()->create())
+        ->getJson('/api/v1/user')
+        ->assertNotFound();
 });

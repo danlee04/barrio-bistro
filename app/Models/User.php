@@ -36,6 +36,18 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * In-memory defaults that mirror the database, so a freshly created user is complete.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'role' => Role::Kitchen->value,
+        'is_active' => true,
+        'must_change_password' => false,
+        'last_login_at' => null,
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

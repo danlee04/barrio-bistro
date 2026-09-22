@@ -197,7 +197,23 @@ Add these `@property` lines to the class docblock (after `$remember_token`):
  * @property Carbon|null $last_login_at
 ```
 
-Keep `#[Fillable(['name', 'email', 'password'])]` exactly as it is (privilege columns stay out). Add the imports `App\Enums\Role`, `Illuminate\Database\Eloquent\Attributes\Scope` and `Illuminate\Database\Eloquent\Builder`, then replace `casts()` and add the helpers:
+Keep `#[Fillable(['name', 'email', 'password'])]` exactly as it is (privilege columns stay out). Mirror the DB defaults in memory, otherwise strict mode throws `MissingAttributeException` when a freshly created user goes through `UserResource`:
+
+```php
+    /**
+     * In-memory defaults that mirror the database, so a freshly created user is complete.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'role' => Role::Kitchen->value,
+        'is_active' => true,
+        'must_change_password' => false,
+        'last_login_at' => null,
+    ];
+```
+
+Add the imports `App\Enums\Role`, `Illuminate\Database\Eloquent\Attributes\Scope` and `Illuminate\Database\Eloquent\Builder`, then replace `casts()` and add the helpers:
 
 ```php
     /**
@@ -626,7 +642,7 @@ test('a deactivated staff member is signed out on their next request', function 
         ->assertUnauthorized()
         ->assertJsonPath('message', 'Your account has been deactivated.');
 
-    $this->assertGuest();
+    $this->assertGuest('web');
 });
 
 test('email verification endpoints are gone', function () {

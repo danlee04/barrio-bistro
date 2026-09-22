@@ -38,10 +38,10 @@ test('the api is rate limited per user', function () {
     $this->actingAs(User::factory()->create());
 
     foreach (range(1, 60) as $attempt) {
-        $this->getJson('/api/v1/user')->assertOk();
+        $this->getJson('/api/v1/me')->assertOk();
     }
 
-    $this->getJson('/api/v1/user')->assertTooManyRequests();
+    $this->getJson('/api/v1/me')->assertTooManyRequests();
 });
 
 test('passwords shorter than 12 characters are rejected', function () {

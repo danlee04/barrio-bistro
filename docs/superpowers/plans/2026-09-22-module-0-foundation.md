@@ -8,7 +8,7 @@
 
 **Architecture:** Laravel serves a single Blade shell (`app.blade.php`) for every non-API GET path, and React Router takes over in the browser. Staff auth uses Breeze's `api` stack: session endpoints (`/login`, `/logout`, …) plus Sanctum's stateful middleware on `/api/v1/*`, so no token is ever stored in JS.
 
-**Tech Stack:** Laravel 13, PHP 8.4, Breeze 2.x (`api` stack), Sanctum, MySQL, Pest 5, React 19, TypeScript, React Router 7, Tailwind CSS 4, shadcn/ui, Vite (vite-plus `vp`).
+**Tech Stack:** Laravel 13, PHP 8.4, Breeze 2.x (`api` stack), Sanctum, MySQL, Pest 5, React 19, TypeScript, React Router 8, Tailwind CSS 4, shadcn/ui, Vite (vite-plus `vp`).
 
 **Spec:** `docs/superpowers/specs/2026-09-22-barrio-bistro-design.md`
 

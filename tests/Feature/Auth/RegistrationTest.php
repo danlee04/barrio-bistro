@@ -1,13 +1,13 @@
 <?php
 
-test('new users can register', function () {
-    $response = $this->post('/register', [
-        'name' => 'Test User',
-        'email' => 'test@example.com',
-        'password' => 'password',
-        'password_confirmation' => 'password',
-    ]);
+test('public self-registration is closed', function () {
+    $this->postJson('/register', [
+        'name' => 'Intruder',
+        'email' => 'intruder@example.com',
+        'password' => 'a-long-enough-passphrase',
+        'password_confirmation' => 'a-long-enough-passphrase',
+    ])->assertMethodNotAllowed();
 
-    $this->assertAuthenticated();
-    $response->assertNoContent();
+    $this->assertGuest();
+    $this->assertDatabaseMissing('users', ['email' => 'intruder@example.com']);
 });

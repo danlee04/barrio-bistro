@@ -49,6 +49,27 @@ test('an uploaded photo becomes two square webp renditions without its exif data
     $this->assertDatabaseHas('audit_logs', ['action' => 'menu_item.photo_changed', 'subject_id' => $this->item->id]);
 });
 
+test('a transparent png keeps its transparency', function () {
+    $image = imagecreatetruecolor(1000, 1000);
+    imagealphablending($image, false);
+    imagesavealpha($image, true);
+    imagefill($image, 0, 0, (int) imagecolorallocatealpha($image, 0, 0, 0, 127));
+    ob_start();
+    imagepng($image);
+    $png = (string) ob_get_clean();
+
+    $this->actingAs($this->admin)
+        ->postJson("/api/v1/admin/menu-items/{$this->item->id}/photo", [
+            'photo' => UploadedFile::fake()->createWithContent('cutout.png', $png),
+        ])
+        ->assertOk();
+
+    $webp = imagecreatefromstring((string) Storage::disk('public')->get($this->item->fresh()->image_path.'-400.webp'));
+    $alpha = (imagecolorat($webp, 10, 10) >> 24) & 0x7F;
+
+    expect($alpha)->toBe(127);
+});
+
 test('replacing a photo deletes the old files', function () {
     $this->actingAs($this->admin)->postJson("/api/v1/admin/menu-items/{$this->item->id}/photo", [
         'photo' => UploadedFile::fake()->image('first.jpg', 1000, 1000),

@@ -19,6 +19,7 @@
 - Archive = soft delete. Archived categories hide all their items from the public menu. Nothing in the catalog is ever hard-deleted from the UI.
 - `is_available` is **not** mass-assignable. It changes only through the availability endpoint.
 - Photo upload: `mimetypes:image/jpeg,image/png,image/webp`, `extensions:jpg,jpeg,png,webp`, `max:5120`, `dimensions:min_width=800,min_height=800,max_width=4096,max_height=4096`. Always re-encoded (strips EXIF/GPS and anything that is not pixels), with generated ULID names, and never upscaled.
+- **Client-side prep (user request, 2026-09-22):** the browser cuts every chosen photo to its centred square and scales it to exactly 800×800 (`resources/js/lib/photo.ts`, `squareCrop()` is unit-tested) before upload. Any size or dimension of JPG/PNG/WebP up to 25 MB is accepted in the UI, and small photos are upscaled with a "may look blurry" notice. The server rules above stay unchanged as defence in depth.
 - Processing is synchronous by design: admin-only, rare, and bounded to 4096 px (~130 MB peak with GD). Revisit (queue it) if uploads become frequent. **Production needs `memory_limit` ≥ 256M** (track in Module 8).
 - Every catalog change is audited: create/update (with a price diff)/archive/restore/photo/availability.
 - New folder `app/Services` (approved by the user for `MenuPhotoProcessor`) and subfolder `app/Models/Concerns`.

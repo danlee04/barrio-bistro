@@ -10,9 +10,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { HttpError } from '@/lib/http';
 import { removeMenuItemPhoto, uploadMenuItemPhoto } from '@/lib/menu';
+import { MAX_ORIGINAL_BYTES, prepareMenuPhoto } from '@/lib/photo';
 import type { MenuItem } from '@/types';
-
-const MAX_BYTES = 5 * 1024 * 1024;
 
 type PhotoFieldProps = {
     item: MenuItem;
@@ -22,7 +21,9 @@ type PhotoFieldProps = {
 export function PhotoField({ item, onChanged }: PhotoFieldProps) {
     const [file, setFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [notice, setNotice] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isPreparing, setIsPreparing] = useState(false);
     const [isWorking, setIsWorking] = useState(false);
 
     useEffect(() => {
@@ -33,20 +34,46 @@ export function PhotoField({ item, onChanged }: PhotoFieldProps) {
         };
     }, [previewUrl]);
 
-    function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    function clearSelection() {
+        setFile(null);
+        setPreviewUrl(null);
+        setNotice(null);
+    }
+
+    async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
         const selected = event.target.files?.[0] ?? null;
         setError(null);
+        clearSelection();
 
-        if (selected && selected.size > MAX_BYTES) {
-            setError('Photos must be 5 MB or smaller.');
-            setFile(null);
-            setPreviewUrl(null);
+        if (selected === null) {
+            return;
+        }
+
+        if (selected.size > MAX_ORIGINAL_BYTES) {
+            setError('That file is over 25 MB. Choose a smaller photo.');
 
             return;
         }
 
-        setFile(selected);
-        setPreviewUrl(selected ? URL.createObjectURL(selected) : null);
+        setIsPreparing(true);
+
+        try {
+            const prepared = await prepareMenuPhoto(selected);
+
+            setFile(prepared.file);
+            setPreviewUrl(URL.createObjectURL(prepared.file));
+            setNotice(
+                prepared.wasUpscaled
+                    ? 'This photo is smaller than 800×800, so it may look a little blurry.'
+                    : null,
+            );
+        } catch {
+            setError(
+                'This file could not be read as a photo. Use a JPG, PNG or WebP image.',
+            );
+        } finally {
+            setIsPreparing(false);
+        }
     }
 
     async function run(action: () => Promise<unknown>) {
@@ -55,8 +82,7 @@ export function PhotoField({ item, onChanged }: PhotoFieldProps) {
 
         try {
             await action();
-            setFile(null);
-            setPreviewUrl(null);
+            clearSelection();
             onChanged();
         } catch (caught) {
             setError(
@@ -76,8 +102,9 @@ export function PhotoField({ item, onChanged }: PhotoFieldProps) {
             <CardHeader>
                 <CardTitle>Photo</CardTitle>
                 <CardDescription>
-                    Shown as a round plate. At least 800×800 pixels; JPG, PNG or
-                    WebP; up to 5 MB. Location data is removed automatically.
+                    Any JPG, PNG or WebP photo. It is cut to its centre and
+                    resized to 800×800 automatically, shown as a round plate.
+                    Location data is removed.
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-start gap-4">
@@ -98,8 +125,19 @@ export function PhotoField({ item, onChanged }: PhotoFieldProps) {
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     aria-label="Choose a photo"
-                    onChange={handleFileChange}
+                    disabled={isPreparing || isWorking}
+                    onChange={(event) => void handleFileChange(event)}
                 />
+                {isPreparing && (
+                    <p className="text-sm text-muted-foreground" role="status">
+                        Preparing photo…
+                    </p>
+                )}
+                {notice && (
+                    <p className="text-sm text-muted-foreground" role="status">
+                        {notice}
+                    </p>
+                )}
                 {error && (
                     <p role="alert" className="text-sm text-destructive">
                         {error}
@@ -108,7 +146,7 @@ export function PhotoField({ item, onChanged }: PhotoFieldProps) {
                 <div className="flex gap-2">
                     <Button
                         type="button"
-                        disabled={!file || isWorking}
+                        disabled={!file || isWorking || isPreparing}
                         onClick={() => {
                             if (file) {
                                 void run(() =>

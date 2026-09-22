@@ -1,14 +1,21 @@
 import { Link } from 'react-router';
+import { restaurant } from '@/content/restaurant';
 
 export default function NotFound() {
     return (
-        <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
-            <h1 className="text-2xl font-semibold">
-                Wala rito ang hinahanap mo.
-            </h1>
-            <Link to="/" className="underline">
-                Bumalik sa home
-            </Link>
-        </main>
+        <>
+            <title>{`Page not found | ${restaurant.name}`}</title>
+            <div className="wrapper flex flex-col items-start gap-4 py-20">
+                <h1 className="font-display text-4xl font-extrabold tracking-tight">
+                    We couldn't find that page.
+                </h1>
+                <p className="text-lg">
+                    It may have moved, or the link has a typo.
+                </p>
+                <Link to="/" className="text-lg underline underline-offset-4">
+                    Go to the home page
+                </Link>
+            </div>
+        </>
     );
 }

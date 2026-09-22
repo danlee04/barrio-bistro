@@ -14,6 +14,7 @@
     --kalamansi: #9cb43c;
     --ube: #5b3a8c;
     --uling: #17110f;
+    --kawayan: #cda869;
 
     --background: var(--pandan);
     --foreground: var(--uling);
@@ -49,6 +50,7 @@
     --color-kalamansi: var(--kalamansi);
     --color-ube: var(--ube);
     --color-uling: var(--uling);
+    --color-kawayan: var(--kawayan);
 
     --color-background: var(--background);
     --color-foreground: var(--foreground);
@@ -82,5 +84,50 @@
 
     body {
         @apply bg-background text-foreground;
+    }
+}
+
+@utility wrapper {
+    inline-size: min(100% - 2rem, 72rem);
+    margin-inline: auto;
+}
+
+@layer components {
+    /* A plate on a bilao: the photo sits inside a woven bamboo rim. */
+    .plate {
+        position: relative;
+        flex-shrink: 0;
+        border-radius: 9999px;
+        padding: 0.4rem;
+        background: repeating-conic-gradient(
+            var(--kawayan) 0deg 5deg,
+            color-mix(in oklab, var(--kawayan) 70%, var(--uling)) 5deg 10deg
+        );
+        box-shadow: 0 0.9rem 1.4rem -0.8rem
+            color-mix(in oklab, var(--uling) 60%, transparent);
+    }
+
+    .plate-sold-out {
+        filter: grayscale(1);
+        opacity: 0.55;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .serve {
+            animation: serve 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+            animation-delay: calc(var(--serve-order, 0) * 90ms);
+        }
+    }
+}
+
+@keyframes serve {
+    from {
+        opacity: 0;
+        transform: translateY(-1.25rem) rotate(-10deg) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
     }
 }

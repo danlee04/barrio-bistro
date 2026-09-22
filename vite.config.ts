@@ -14,6 +14,9 @@ export default defineConfig({
                 bunny('Instrument Sans', {
                     weights: [400, 500, 600],
                 }),
+                bunny('Bricolage Grotesque', {
+                    weights: [400, 600, 800],
+                }),
             ],
         }),
         react(),

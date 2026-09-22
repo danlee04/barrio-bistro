@@ -22,45 +22,47 @@
 - After PHP edits: `vendor/bin/pint --dirty --format agent`.
 - Do not add dependencies beyond those named in this plan without approval.
 - Public `/register` is removed in Task 4, because only an Admin creates staff accounts (Module 1). **Module 1** also adds a `UserResource` for `/api/v1/user`.
-- Security rules in `CLAUDE.md` → *Security Guidelines* apply to every task.
+- Security rules in `CLAUDE.md` → _Security Guidelines_ apply to every task.
 
 ## File Map
 
-| File | Change | Responsibility |
-|---|---|---|
-| `.env`, `.env.example` | Modify | App name, MySQL, `FRONTEND_URL`, Sanctum stateful domains |
-| `bootstrap/app.php` | Replace | Routing (`api/v1` prefix), stateful API middleware, no Inertia |
-| `app/Http/Middleware/HandleInertiaRequests.php` | Delete | Inertia only |
-| `config/inertia.php` | Delete | Inertia only |
-| `app/Providers/AppServiceProvider.php` | Merge | Keep the starter's `configureDefaults()` + Breeze's reset-URL callback |
-| `routes/web.php` | Replace | Auth routes + SPA catch-all |
-| `routes/api.php`, `routes/auth.php`, `app/Http/Controllers/Auth/*`, `app/Http/Requests/Auth/LoginRequest.php`, `app/Http/Middleware/EnsureEmailIsVerified.php`, `tests/Feature/Auth/*` | Created by Breeze | Staff session auth |
-| `tests/Feature/SanctumSpaTest.php` | Create | CSRF cookie + stateful API contract |
-| `tests/Feature/SpaShellTest.php` | Create | Catch-all serves the shell; API 404s stay JSON |
-| `tests/Feature/ExampleTest.php` | Delete (Task 3) | Replaced by `SpaShellTest`; Breeze overwrites it in Task 2 |
-| `resources/views/app.blade.php` | Replace | Plain SPA shell |
-| `resources/js/app.tsx` | Replace | React root + router |
-| `resources/js/router.tsx` | Create | Route table |
-| `resources/js/pages/home.tsx`, `resources/js/pages/not-found.tsx` | Create | Placeholder pages |
-| `resources/js/pages/welcome.tsx`, `resources/js/actions/`, `resources/js/routes/`, `resources/js/wayfinder/` | Delete | Inertia/Wayfinder only |
-| `resources/js/types/global.d.ts` | Modify | Drop the Inertia module augmentation |
-| `vite.config.ts`, `package.json`, `pnpm-workspace.yaml` | Modify | Drop the Inertia/Wayfinder plugins and packages |
-| `app/Http/Middleware/SecurityHeaders.php`, `config/security.php` | Create | CSP (nonce), security headers, HSTS in production |
-| `tests/Feature/SecurityHeadersTest.php`, `tests/Feature/Auth/AuthHardeningTest.php` | Create | Security baseline contract |
-| `app/Http/Controllers/Auth/RegisteredUserController.php` | Delete | Public registration is closed |
-| `components.json` | Create | shadcn config |
-| `resources/css/app.css` | Replace | Bilao tokens mapped to shadcn variables |
-| `resources/js/components/ui/*` | Created by shadcn | Button, Card, Badge |
+| File                                                                                                                                                                                   | Change            | Responsibility                                                         |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- | ---------------------------------------------------------------------- |
+| `.env`, `.env.example`                                                                                                                                                                 | Modify            | App name, MySQL, `FRONTEND_URL`, Sanctum stateful domains              |
+| `bootstrap/app.php`                                                                                                                                                                    | Replace           | Routing (`api/v1` prefix), stateful API middleware, no Inertia         |
+| `app/Http/Middleware/HandleInertiaRequests.php`                                                                                                                                        | Delete            | Inertia only                                                           |
+| `config/inertia.php`                                                                                                                                                                   | Delete            | Inertia only                                                           |
+| `app/Providers/AppServiceProvider.php`                                                                                                                                                 | Merge             | Keep the starter's `configureDefaults()` + Breeze's reset-URL callback |
+| `routes/web.php`                                                                                                                                                                       | Replace           | Auth routes + SPA catch-all                                            |
+| `routes/api.php`, `routes/auth.php`, `app/Http/Controllers/Auth/*`, `app/Http/Requests/Auth/LoginRequest.php`, `app/Http/Middleware/EnsureEmailIsVerified.php`, `tests/Feature/Auth/*` | Created by Breeze | Staff session auth                                                     |
+| `tests/Feature/SanctumSpaTest.php`                                                                                                                                                     | Create            | CSRF cookie + stateful API contract                                    |
+| `tests/Feature/SpaShellTest.php`                                                                                                                                                       | Create            | Catch-all serves the shell; API 404s stay JSON                         |
+| `tests/Feature/ExampleTest.php`                                                                                                                                                        | Delete (Task 3)   | Replaced by `SpaShellTest`; Breeze overwrites it in Task 2             |
+| `resources/views/app.blade.php`                                                                                                                                                        | Replace           | Plain SPA shell                                                        |
+| `resources/js/app.tsx`                                                                                                                                                                 | Replace           | React root + router                                                    |
+| `resources/js/router.tsx`                                                                                                                                                              | Create            | Route table                                                            |
+| `resources/js/pages/home.tsx`, `resources/js/pages/not-found.tsx`                                                                                                                      | Create            | Placeholder pages                                                      |
+| `resources/js/pages/welcome.tsx`, `resources/js/actions/`, `resources/js/routes/`, `resources/js/wayfinder/`                                                                           | Delete            | Inertia/Wayfinder only                                                 |
+| `resources/js/types/global.d.ts`                                                                                                                                                       | Modify            | Drop the Inertia module augmentation                                   |
+| `vite.config.ts`, `package.json`, `pnpm-workspace.yaml`                                                                                                                                | Modify            | Drop the Inertia/Wayfinder plugins and packages                        |
+| `app/Http/Middleware/SecurityHeaders.php`, `config/security.php`                                                                                                                       | Create            | CSP (nonce), security headers, HSTS in production                      |
+| `tests/Feature/SecurityHeadersTest.php`, `tests/Feature/Auth/AuthHardeningTest.php`                                                                                                    | Create            | Security baseline contract                                             |
+| `app/Http/Controllers/Auth/RegisteredUserController.php`                                                                                                                               | Delete            | Public registration is closed                                          |
+| `components.json`                                                                                                                                                                      | Create            | shadcn config                                                          |
+| `resources/css/app.css`                                                                                                                                                                | Replace           | Bilao tokens mapped to shadcn variables                                |
+| `resources/js/components/ui/*`                                                                                                                                                         | Created by shadcn | Button, Card, Badge                                                    |
 
 ---
 
 ### Task 1: Baseline on MySQL
 
 **Files:**
+
 - Modify: `.env` (`APP_NAME`)
 - Commit: `docs/`
 
 **Interfaces:**
+
 - Produces: a clean git baseline, and MySQL database `barriobistro_db` with the default migrations run.
 
 - [ ] **Step 1: Commit the spec and plan**
@@ -79,7 +81,7 @@ APP_NAME="Barrio Bistro"
 - [ ] **Step 3: Start MySQL in Laragon, then run migrations**
 
 Run: `php artisan migrate`
-Expected: if `barriobistro_db` doesn't exist, Laravel asks *"Would you like to create it?"* → **yes**. It then runs `create_users_table`, `create_cache_table`, `create_jobs_table`.
+Expected: if `barriobistro_db` doesn't exist, Laravel asks _"Would you like to create it?"_ → **yes**. It then runs `create_users_table`, `create_cache_table`, `create_jobs_table`.
 
 - [ ] **Step 4: Confirm the baseline suite passes**
 
@@ -91,6 +93,7 @@ Expected: PASS (2 tests).
 ### Task 2: Replace Inertia with Breeze API + Sanctum
 
 **Files:**
+
 - Delete: `app/Http/Middleware/HandleInertiaRequests.php`, `config/inertia.php`
 - Replace: `bootstrap/app.php`
 - Merge: `app/Providers/AppServiceProvider.php`
@@ -99,6 +102,7 @@ Expected: PASS (2 tests).
 - Created by Breeze: `routes/api.php`, `routes/auth.php`, `app/Http/Controllers/Auth/*`, `app/Http/Requests/Auth/LoginRequest.php`, `app/Http/Middleware/EnsureEmailIsVerified.php`, `tests/Feature/Auth/*`
 
 **Interfaces:**
+
 - Produces: `POST /login` and `POST /logout` (204), `GET /sanctum/csrf-cookie` (204 + `XSRF-TOKEN` cookie), and `GET /api/v1/user` (`auth:sanctum`) returning the user JSON or 401.
 
 - [ ] **Step 1: Remove the Inertia server pieces**
@@ -307,12 +311,14 @@ git commit -m "feat: replace Inertia with Breeze API and Sanctum SPA auth under 
 ### Task 3: React SPA shell with React Router
 
 **Files:**
+
 - Replace: `routes/web.php`, `resources/views/app.blade.php`, `resources/js/app.tsx`
 - Create: `resources/js/router.tsx`, `resources/js/pages/home.tsx`, `resources/js/pages/not-found.tsx`, `tests/Feature/SpaShellTest.php`
 - Delete: `resources/js/pages/welcome.tsx`, `resources/js/actions/`, `resources/js/routes/`, `resources/js/wayfinder/`, `tests/Feature/ExampleTest.php`
 - Modify: `resources/js/types/global.d.ts`, `vite.config.ts`, `package.json`, `pnpm-workspace.yaml`
 
 **Interfaces:**
+
 - Consumes: the auth routes in `routes/auth.php` (Task 2).
 - Produces: `GET /{path?}` named `spa`, which renders view `app` for any path not under `api/`, `sanctum/` or `up`; a DOM mount point `#app`; and `resources/js/router.tsx` exporting `router`.
 
@@ -485,7 +491,9 @@ import { Link } from 'react-router';
 export default function NotFound() {
     return (
         <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
-            <h1 className="text-2xl font-semibold">Wala rito ang hinahanap mo.</h1>
+            <h1 className="text-2xl font-semibold">
+                Wala rito ang hinahanap mo.
+            </h1>
             <Link to="/" className="underline">
                 Bumalik sa home
             </Link>
@@ -539,19 +547,20 @@ Expected: all tests PASS.
 
 Closes the gaps Breeze leaves open and adds the defences that every later module relies on.
 
-| Threat | Defence in this task |
-|---|---|
-| Anyone creating a staff account | Public `/register` removed |
-| Credential stuffing across many emails | Per-IP `throttle:login` on top of Breeze's per-email+IP lock |
-| Account enumeration via "forgot password" | Same response whether or not the email exists |
-| API scraping / abuse | `throttleApi()`: 60 requests/min per user or IP |
-| XSS, clickjacking, MIME sniffing | `SecurityHeaders`: nonce-based CSP, `X-Frame-Options`, `nosniff`, HSTS in production |
-| Session theft from the DB / plaintext | Encrypted sessions, HttpOnly + SameSite=Lax cookie, Secure in production |
-| Mass assignment slipping through silently | `Model::shouldBeStrict()` outside production |
-| Weak passwords | `Password::min(12)`, plus `uncompromised()` in production |
-| Cached authenticated pages | `Cache-Control: no-store, private` when logged in |
+| Threat                                    | Defence in this task                                                                 |
+| ----------------------------------------- | ------------------------------------------------------------------------------------ |
+| Anyone creating a staff account           | Public `/register` removed                                                           |
+| Credential stuffing across many emails    | Per-IP `throttle:login` on top of Breeze's per-email+IP lock                         |
+| Account enumeration via "forgot password" | Same response whether or not the email exists                                        |
+| API scraping / abuse                      | `throttleApi()`: 60 requests/min per user or IP                                      |
+| XSS, clickjacking, MIME sniffing          | `SecurityHeaders`: nonce-based CSP, `X-Frame-Options`, `nosniff`, HSTS in production |
+| Session theft from the DB / plaintext     | Encrypted sessions, HttpOnly + SameSite=Lax cookie, Secure in production             |
+| Mass assignment slipping through silently | `Model::shouldBeStrict()` outside production                                         |
+| Weak passwords                            | `Password::min(12)`, plus `uncompromised()` in production                            |
+| Cached authenticated pages                | `Cache-Control: no-store, private` when logged in                                    |
 
 **Files:**
+
 - Create: `app/Http/Middleware/SecurityHeaders.php`, `config/security.php`, `tests/Feature/SecurityHeadersTest.php`, `tests/Feature/Auth/AuthHardeningTest.php`
 - Modify: `bootstrap/app.php`, `routes/auth.php`, `app/Providers/AppServiceProvider.php`, `app/Http/Controllers/Auth/PasswordResetLinkController.php`, `app/Http/Requests/Auth/LoginRequest.php`, `config/session.php`, `vite.config.ts`, `.env`, `.env.example`
 - Rewrite: `tests/Feature/Auth/RegistrationTest.php` (it now proves registration is closed)
@@ -559,6 +568,7 @@ Closes the gaps Breeze leaves open and adds the defences that every later module
 - Delete: `app/Http/Controllers/Auth/RegisteredUserController.php`
 
 **Interfaces:**
+
 - Consumes: `spa` catch-all (Task 3), the Breeze auth routes (Task 2).
 - Produces: rate limiters `api` and `login`; middleware `App\Http\Middleware\SecurityHeaders` (global); config key `security.csp_report_only`.
 
@@ -1001,12 +1011,14 @@ git commit -m "feat: security baseline - CSP and headers, rate limits, closed re
 ### Task 5: shadcn/ui + Bilao theme
 
 **Files:**
+
 - Create: `components.json`
 - Replace: `resources/css/app.css`
 - Modify: `vite.config.ts` (add a font), `resources/js/pages/home.tsx`
 - Created by shadcn: `resources/js/components/ui/button.tsx`, `card.tsx`, `badge.tsx`
 
 **Interfaces:**
+
 - Consumes: `cn()` from `@/lib/utils` (it already exists).
 - Produces: shadcn components at `@/components/ui/*`, Tailwind color utilities `bg-dahon`, `bg-pandan`, `bg-achuete`, `text-kalamansi`, `bg-ube`, `text-uling`, the shadcn semantic tokens (`bg-primary`, …) mapped to Bilao, and `font-display` (Bricolage Grotesque).
 
@@ -1153,7 +1165,9 @@ export default function Home() {
     return (
         <main className="min-h-screen bg-dahon p-6 text-pandan">
             <div className="mx-auto flex max-w-4xl flex-col gap-6 py-24">
-                <Badge className="w-fit bg-kalamansi text-uling">Bukas ngayon</Badge>
+                <Badge className="w-fit bg-kalamansi text-uling">
+                    Bukas ngayon
+                </Badge>
                 <h1 className="font-display text-5xl font-extrabold leading-tight md:text-7xl">
                     Nasa kalan
                     <br />

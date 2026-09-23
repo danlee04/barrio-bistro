@@ -87,6 +87,18 @@ class AppServiceProvider extends ServiceProvider
 
             return $limits;
         });
+
+        // Starting a payment costs us a provider call, so it is held tighter
+        // than ordinary reads. Ten is generous for one guest and cheap for us.
+        RateLimiter::for('payments', function (Request $request): array {
+            $limits = [Limit::perMinute(10)->by('ip:'.$request->ip())];
+
+            if ($request->hasSession()) {
+                $limits[] = Limit::perMinute(10)->by('device:'.$request->session()->getId());
+            }
+
+            return $limits;
+        });
     }
 
     /**

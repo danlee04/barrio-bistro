@@ -10,7 +10,23 @@ export type OrderStatus =
 
 export type PaymentStatus = 'unpaid' | 'paid';
 
-export type PaymentMethod = 'counter';
+export type PaymentMethod = 'counter' | 'online';
+
+export type PaymentState = 'pending' | 'paid' | 'failed';
+
+export type CheckoutOptions = {
+    tables: number;
+    methods: PaymentMethod[];
+    online_minimum: number;
+};
+
+export type Payment = {
+    checkout_url: string | null;
+    amount: number;
+    state: PaymentState;
+    method: string | null;
+    paid_at: string | null;
+};
 
 export type OrderLineInput = {
     menu_item_id: number;

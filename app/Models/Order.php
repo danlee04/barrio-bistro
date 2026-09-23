@@ -38,6 +38,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Collection<int, OrderItem> $items
+ * @property-read Collection<int, Payment> $payments
  */
 #[Fillable(['type', 'table_number', 'customer_name', 'payment_method'])]
 class Order extends Model
@@ -102,5 +103,23 @@ class Order extends Model
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class)->orderBy('id');
+    }
+
+    /**
+     * Every attempt to pay this order, newest first.
+     *
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class)->latest('id');
+    }
+
+    /**
+     * The attempt that matters right now.
+     */
+    public function latestPayment(): ?Payment
+    {
+        return $this->payments()->first();
     }
 }

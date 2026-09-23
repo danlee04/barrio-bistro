@@ -1,11 +1,22 @@
-import { useEffect } from 'react';
-import { Link, useLoaderData } from 'react-router';
+import { useEffect, useRef, useState } from 'react';
+import {
+    Link,
+    useLoaderData,
+    useRevalidator,
+    useSearchParams,
+} from 'react-router';
+import { Button } from '@/components/ui/button';
 import { restaurant } from '@/content/restaurant';
+import { HttpError } from '@/lib/http';
 import { formatPeso } from '@/lib/money';
 import { useOrderUpdates } from '@/lib/order-polling';
 import { type orderLoader, rememberOrder } from '@/lib/orders';
+import { createCheckoutSession, refreshPayment } from '@/lib/payments';
 import { cn } from '@/lib/utils';
 import type { OrderStatus as Status } from '@/types';
+
+const unavailable =
+    'Online payment is not available right now. Please pay at the counter.';
 
 const steps: { status: Status; label: string }[] = [
     { status: 'pending', label: 'Placed' },
@@ -20,9 +31,59 @@ export default function OrderStatus() {
     const order = useOrderUpdates(initial);
     const current = steps.findIndex((step) => step.status === order.status);
 
+    const [searchParams, setSearchParams] = useSearchParams();
+    const revalidator = useRevalidator();
+    const [paying, setPaying] = useState(false);
+    const [payError, setPayError] = useState<string | null>(null);
+    const checked = useRef(false);
+
     useEffect(() => {
         rememberOrder(order.token);
     }, [order.token]);
+
+    // Back from PayMongo: our server asks them how it went — the browser's own
+    // word is never enough — and then the page reloads the order.
+    useEffect(() => {
+        if (searchParams.get('paid') !== '1' || checked.current) {
+            return;
+        }
+
+        checked.current = true;
+
+        refreshPayment(order.token)
+            .then(() => {
+                const next = new URLSearchParams(searchParams);
+                next.delete('paid');
+                setSearchParams(next, { replace: true });
+                void revalidator.revalidate();
+            })
+            .catch(() => undefined);
+    }, [order.token, revalidator, searchParams, setSearchParams]);
+
+    async function handlePayOnline() {
+        setPaying(true);
+        setPayError(null);
+
+        try {
+            const payment = await createCheckoutSession(order.token);
+
+            if (payment.checkout_url !== null) {
+                window.location.assign(payment.checkout_url);
+
+                return;
+            }
+
+            setPayError(unavailable);
+        } catch (failure) {
+            setPayError(
+                failure instanceof HttpError && failure.body.message
+                    ? failure.body.message
+                    : unavailable,
+            );
+        }
+
+        setPaying(false);
+    }
 
     return (
         <>
@@ -44,15 +105,40 @@ export default function OrderStatus() {
                         This order was cancelled. Talk to the counter if that is
                         a surprise.
                     </p>
+                ) : order.payment_status === 'paid' ? (
+                    <p className="rounded-xl border-2 border-kalamansi bg-card p-4">
+                        <span className="font-display text-xl font-extrabold">
+                            Paid.
+                        </span>{' '}
+                        Thank you — the kitchen has your order.
+                    </p>
                 ) : (
-                    order.payment_status === 'unpaid' && (
-                        <p className="rounded-xl border-2 border-achuete bg-card p-4">
+                    <div className="flex flex-col gap-3 rounded-xl border-2 border-achuete bg-card p-4">
+                        <p>
                             <span className="font-display text-xl font-extrabold">
-                                Pay at the counter.
+                                Not paid yet.
                             </span>{' '}
-                            Show this number and the kitchen starts right after.
+                            Show this number at the counter, or pay online now.
                         </p>
-                    )
+
+                        <Button
+                            type="button"
+                            className="min-h-12 w-fit rounded-full px-6"
+                            disabled={paying}
+                            onClick={handlePayOnline}
+                        >
+                            {paying ? 'Opening…' : 'Pay online'}
+                        </Button>
+
+                        {payError && (
+                            <p
+                                role="alert"
+                                className="font-semibold text-destructive"
+                            >
+                                {payError}
+                            </p>
+                        )}
+                    </div>
                 )}
 
                 {order.status !== 'cancelled' && (

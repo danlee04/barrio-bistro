@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Enums\OrderType;
 use App\Enums\PaymentMethod;
+use App\Services\PayMongoClient;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -54,13 +55,29 @@ class PlaceOrderRequest extends FormRequest
                 'string',
                 'max:40',
             ],
-            'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
+            'payment_method' => ['required', Rule::enum(PaymentMethod::class)->only($this->allowedMethods())],
             'items' => ['required', 'array', 'min:1', 'max:30'],
             'items.*.menu_item_id' => ['required', 'integer', 'min:1'],
             'items.*.menu_item_size_id' => ['required', 'integer', 'min:1'],
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:20'],
             'items.*.note' => ['nullable', 'string', 'max:120'],
         ];
+    }
+
+    /**
+     * Online payment is only offered while PayMongo is configured.
+     *
+     * @return array<int, PaymentMethod>
+     */
+    private function allowedMethods(): array
+    {
+        $methods = [PaymentMethod::Counter];
+
+        if (app(PayMongoClient::class)->enabled()) {
+            $methods[] = PaymentMethod::Online;
+        }
+
+        return $methods;
     }
 
     /**

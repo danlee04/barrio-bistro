@@ -1,5 +1,10 @@
 import { type FormEvent, useState } from 'react';
-import { Link, useNavigate, useRouteLoaderData } from 'react-router';
+import {
+    Link,
+    useLoaderData,
+    useNavigate,
+    useRouteLoaderData,
+} from 'react-router';
 import { QuantityStepper } from '@/components/cart/quantity-stepper';
 import { Plate } from '@/components/public/plate';
 import { Button } from '@/components/ui/button';
@@ -11,9 +16,14 @@ import { useCart } from '@/lib/cart-context';
 import { HttpError, type ValidationErrors } from '@/lib/http';
 import { formatPeso } from '@/lib/money';
 import { placeOrder, rememberOrder } from '@/lib/orders';
+import {
+    canPayOnline,
+    type checkoutOptionsLoader,
+    createCheckoutSession,
+} from '@/lib/payments';
 import type { publicMenuLoader } from '@/lib/public-menu';
 import { cn } from '@/lib/utils';
-import type { OrderType } from '@/types';
+import type { OrderType, PaymentMethod } from '@/types';
 
 export default function Cart() {
     const categories =
@@ -21,13 +31,16 @@ export default function Cart() {
     const { cart, setQuantity, setNote, remove, setTable, clear } = useCart();
     const navigate = useNavigate();
 
+    const options = useLoaderData<typeof checkoutOptionsLoader>();
     const [type, setType] = useState<OrderType>('dine_in');
+    const [method, setMethod] = useState<PaymentMethod>('counter');
     const [name, setName] = useState('');
     const [errors, setErrors] = useState<ValidationErrors>({});
     const [message, setMessage] = useState<string | null>(null);
     const [placing, setPlacing] = useState(false);
 
     const { lines, subtotal, soldOut } = priceCart(cart, categories);
+    const onlineAvailable = canPayOnline(subtotal, options);
     const error = (field: string) => errors[field]?.[0];
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -41,7 +54,7 @@ export default function Cart() {
                 type,
                 table_number: type === 'dine_in' ? cart.table : null,
                 customer_name: type === 'takeout' ? name.trim() : null,
-                payment_method: 'counter',
+                payment_method: onlineAvailable ? method : 'counter',
                 items: lines.map(({ line }) => ({
                     menu_item_id: line.itemId,
                     menu_item_size_id: line.sizeId,
@@ -52,6 +65,22 @@ export default function Cart() {
 
             rememberOrder(order.token);
             clear();
+
+            if (onlineAvailable && method === 'online') {
+                try {
+                    const payment = await createCheckoutSession(order.token);
+
+                    if (payment.checkout_url !== null) {
+                        window.location.assign(payment.checkout_url);
+
+                        return;
+                    }
+                } catch {
+                    // The order is placed either way. The status screen offers
+                    // both trying again and paying at the counter.
+                }
+            }
+
             void navigate(`/order/${order.token}`);
         } catch (failure) {
             if (failure instanceof HttpError) {
@@ -286,15 +315,55 @@ export default function Cart() {
                     )}
                 </fieldset>
 
-                <div className="rounded-xl border-2 border-dahon bg-card p-4">
-                    <p className="font-display text-xl font-extrabold">
-                        Pay at the counter
-                    </p>
-                    <p className="text-muted-foreground">
-                        Place the order, then pay at the counter. The kitchen
-                        starts once it is paid.
-                    </p>
-                </div>
+                <fieldset className="flex flex-col gap-3">
+                    <legend className="mb-2 font-display text-xl font-extrabold">
+                        How would you like to pay?
+                    </legend>
+
+                    <div role="group" className="grid gap-3 sm:grid-cols-2">
+                        <button
+                            type="button"
+                            aria-pressed={
+                                !onlineAvailable || method === 'counter'
+                            }
+                            onClick={() => setMethod('counter')}
+                            className={cn(
+                                'flex min-h-20 flex-col justify-center rounded-xl border-2 px-4 text-left',
+                                !onlineAvailable || method === 'counter'
+                                    ? 'border-dahon bg-dahon text-pandan'
+                                    : 'border-border bg-card',
+                            )}
+                        >
+                            <span className="font-display text-lg font-extrabold">
+                                Pay at the counter
+                            </span>
+                            <span className="text-sm opacity-80">
+                                The kitchen starts once it is paid.
+                            </span>
+                        </button>
+
+                        {onlineAvailable && (
+                            <button
+                                type="button"
+                                aria-pressed={method === 'online'}
+                                onClick={() => setMethod('online')}
+                                className={cn(
+                                    'flex min-h-20 flex-col justify-center rounded-xl border-2 px-4 text-left',
+                                    method === 'online'
+                                        ? 'border-dahon bg-dahon text-pandan'
+                                        : 'border-border bg-card',
+                                )}
+                            >
+                                <span className="font-display text-lg font-extrabold">
+                                    Pay online
+                                </span>
+                                <span className="text-sm opacity-80">
+                                    GCash or card, on PayMongo's page.
+                                </span>
+                            </button>
+                        )}
+                    </div>
+                </fieldset>
 
                 <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
                     <p className="font-display text-2xl font-extrabold">

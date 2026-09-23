@@ -9,6 +9,7 @@ import {
     menuItemFormLoader,
 } from '@/lib/menu';
 import { orderLoader } from '@/lib/orders';
+import { checkoutOptionsLoader } from '@/lib/payments';
 import { publicMenuLoader } from '@/lib/public-menu';
 import { staffPageLoader } from '@/lib/staff';
 import Cart from '@/pages/cart';
@@ -35,7 +36,7 @@ export const router = createBrowserRouter([
         children: [
             { path: '/', element: <Home /> },
             { path: '/menu', element: <Menu /> },
-            { path: '/cart', element: <Cart /> },
+            { path: '/cart', element: <Cart />, loader: checkoutOptionsLoader },
             {
                 path: '/order/:token',
                 loader: orderLoader,

@@ -1,4 +1,13 @@
 import {
+    CookingPot,
+    KeyRound,
+    LayoutDashboard,
+    LogOut,
+    ReceiptText,
+    Users,
+    UtensilsCrossed,
+} from 'lucide-react';
+import {
     Link,
     NavLink,
     Outlet,
@@ -14,28 +23,38 @@ export default function AdminLayout() {
     const navigate = useNavigate();
 
     const links = [
-        { to: '/admin', label: 'Dashboard', end: true, visible: true },
+        {
+            to: '/admin',
+            label: 'Dashboard',
+            icon: LayoutDashboard,
+            end: true,
+            visible: true,
+        },
         {
             to: '/admin/orders',
             label: 'Orders',
+            icon: ReceiptText,
             end: false,
             visible: true,
         },
         {
             to: '/admin/kitchen',
             label: 'Kitchen',
+            icon: CookingPot,
             end: false,
             visible: true,
         },
         {
             to: '/admin/menu',
             label: 'Menu',
+            icon: UtensilsCrossed,
             end: false,
             visible: abilities.update_availability,
         },
         {
             to: '/admin/staff',
             label: 'Staff',
+            icon: Users,
             end: false,
             visible: abilities.manage_staff,
         },
@@ -49,13 +68,13 @@ export default function AdminLayout() {
     return (
         <div className="flex min-h-screen flex-col bg-background md:flex-row">
             <aside className="flex shrink-0 flex-col gap-6 border-b bg-card p-4 md:w-60 md:border-r md:border-b-0">
-                <Link
-                    to="/admin"
-                    className="font-display text-xl font-extrabold text-dahon"
-                >
+                <Link to="/admin" className="text-xl font-bold text-dahon">
                     Barrio Bistro
                 </Link>
-                <nav className="flex gap-1 md:flex-col" aria-label="Admin">
+                <nav
+                    className="-mx-1 flex gap-1 overflow-x-auto overscroll-x-contain px-1 md:mx-0 md:flex-col md:overflow-visible md:px-0"
+                    aria-label="Admin"
+                >
                     {links.map((link) => (
                         <NavLink
                             key={link.to}
@@ -63,11 +82,15 @@ export default function AdminLayout() {
                             end={link.end}
                             className={({ isActive }) =>
                                 cn(
-                                    'rounded-md px-3 py-2 text-sm font-medium hover:bg-muted',
+                                    'flex min-h-11 shrink-0 flex-col items-center justify-center gap-1 rounded-md px-3 py-2 text-xs font-medium hover:bg-muted md:flex-row md:justify-start md:gap-2 md:text-sm',
                                     isActive && 'bg-muted text-dahon',
                                 )
                             }
                         >
+                            <link.icon
+                                aria-hidden="true"
+                                className="size-5 md:size-4"
+                            />
                             {link.label}
                         </NavLink>
                     ))}
@@ -79,7 +102,11 @@ export default function AdminLayout() {
                             {user.role_label}
                         </p>
                     </div>
-                    <Link to="/account/password" className="underline">
+                    <Link
+                        to="/account/password"
+                        className="flex items-center gap-2 underline underline-offset-4"
+                    >
+                        <KeyRound aria-hidden="true" className="size-4" />
                         Change password
                     </Link>
                     <Button
@@ -87,6 +114,7 @@ export default function AdminLayout() {
                         size="sm"
                         onClick={() => void handleLogout()}
                     >
+                        <LogOut aria-hidden="true" />
                         Log out
                     </Button>
                 </div>

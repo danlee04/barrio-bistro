@@ -107,7 +107,7 @@ export default function Cart() {
                 <title>{`Your order | ${restaurant.name}`}</title>
 
                 <div className="wrapper flex flex-col items-start gap-4 py-20">
-                    <h1 className="font-display text-4xl font-extrabold tracking-tight">
+                    <h1 className="font-display text-4xl font-bold tracking-tight">
                         Your order is empty.
                     </h1>
                     <p className="text-lg">Pick something from today's menu.</p>
@@ -130,7 +130,7 @@ export default function Cart() {
                 onSubmit={handleSubmit}
                 className="wrapper flex flex-col gap-8 py-10"
             >
-                <h1 className="font-display text-4xl font-extrabold tracking-tight">
+                <h1 className="font-display text-4xl font-bold tracking-tight">
                     Your order
                 </h1>
 
@@ -171,7 +171,7 @@ export default function Cart() {
                                     )}
                                 </div>
 
-                                <p className="font-display text-lg font-extrabold">
+                                <p className="font-display text-lg font-bold">
                                     {formatPeso(lineTotal)}
                                 </p>
                             </div>
@@ -217,7 +217,7 @@ export default function Cart() {
                 </ul>
 
                 <fieldset className="flex flex-col gap-3">
-                    <legend className="mb-2 font-display text-xl font-extrabold">
+                    <legend className="mb-2 font-display text-xl font-bold">
                         Where are you eating?
                     </legend>
 
@@ -316,7 +316,7 @@ export default function Cart() {
                 </fieldset>
 
                 <fieldset className="flex flex-col gap-3">
-                    <legend className="mb-2 font-display text-xl font-extrabold">
+                    <legend className="mb-2 font-display text-xl font-bold">
                         How would you like to pay?
                     </legend>
 
@@ -334,7 +334,7 @@ export default function Cart() {
                                     : 'border-border bg-card',
                             )}
                         >
-                            <span className="font-display text-lg font-extrabold">
+                            <span className="font-display text-lg font-bold">
                                 Pay at the counter
                             </span>
                             <span className="text-sm opacity-80">
@@ -354,7 +354,7 @@ export default function Cart() {
                                         : 'border-border bg-card',
                                 )}
                             >
-                                <span className="font-display text-lg font-extrabold">
+                                <span className="font-display text-lg font-bold">
                                     Pay online
                                 </span>
                                 <span className="text-sm opacity-80">
@@ -366,7 +366,7 @@ export default function Cart() {
                 </fieldset>
 
                 <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
-                    <p className="font-display text-2xl font-extrabold">
+                    <p className="font-display text-2xl font-bold">
                         Total {formatPeso(subtotal)}
                     </p>
 

@@ -6,7 +6,7 @@ export default function NotFound() {
         <>
             <title>{`Page not found | ${restaurant.name}`}</title>
             <div className="wrapper flex flex-col items-start gap-4 py-20">
-                <h1 className="font-display text-4xl font-extrabold tracking-tight">
+                <h1 className="font-display text-4xl font-bold tracking-tight">
                     We couldn't find that page.
                 </h1>
                 <p className="text-lg">

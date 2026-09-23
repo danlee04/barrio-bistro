@@ -5,7 +5,7 @@ export function PlateThumb({ item }: { item: MenuItem }) {
         return (
             <div
                 aria-hidden="true"
-                className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted font-display text-lg font-extrabold text-muted-foreground"
+                className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-bold text-muted-foreground"
             >
                 {item.name.charAt(0)}
             </div>

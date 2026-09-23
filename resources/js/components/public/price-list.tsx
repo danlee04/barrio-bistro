@@ -12,7 +12,7 @@ type PriceListProps = {
 export function PriceList({ sizes, className }: PriceListProps) {
     if (sizes.length === 1) {
         return (
-            <p className={cn('font-display text-xl font-extrabold', className)}>
+            <p className={cn('font-display text-xl font-bold', className)}>
                 {formatPeso(sizes[0].price)}
             </p>
         );
@@ -28,7 +28,7 @@ export function PriceList({ sizes, className }: PriceListProps) {
             {sizes.map((size) => (
                 <Fragment key={size.id}>
                     <dt className="opacity-80">{size.name}</dt>
-                    <dd className="font-display font-extrabold">
+                    <dd className="font-display font-bold">
                         {formatPeso(size.price)}
                     </dd>
                 </Fragment>

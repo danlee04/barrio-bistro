@@ -63,9 +63,7 @@ export default function Orders() {
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
-                <h1 className="font-display text-3xl font-extrabold tracking-tight">
-                    Orders
-                </h1>
+                <h1 className="text-3xl font-bold tracking-tight">Orders</h1>
 
                 <div
                     role="group"

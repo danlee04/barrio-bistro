@@ -47,7 +47,7 @@ export default function Login() {
         <main className="flex min-h-screen items-center justify-center bg-dahon p-6">
             <Card className="w-full max-w-sm">
                 <CardHeader>
-                    <CardTitle className="font-display text-2xl font-extrabold">
+                    <CardTitle className="text-2xl font-bold">
                         Staff login
                     </CardTitle>
                     <CardDescription>

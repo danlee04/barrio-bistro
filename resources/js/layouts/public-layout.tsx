@@ -1,6 +1,6 @@
 import { Link, NavLink, Outlet, ScrollRestoration } from 'react-router';
 import { CartProvider } from '@/components/cart/cart-provider';
-import { OrderBar } from '@/components/cart/order-bar';
+import { CartDock } from '@/components/cart/cart-dock';
 import { RecentOrderLink } from '@/components/cart/recent-order-link';
 import { restaurant } from '@/content/restaurant';
 import { cn } from '@/lib/utils';
@@ -26,7 +26,7 @@ export default function PublicLayout() {
                     <div className="wrapper flex min-h-16 flex-wrap items-center justify-between gap-x-6 gap-y-2 py-3">
                         <Link
                             to="/"
-                            className="font-display text-xl font-extrabold tracking-tight"
+                            className="font-display text-xl font-bold tracking-tight"
                         >
                             {restaurant.name}
                         </Link>
@@ -59,7 +59,7 @@ export default function PublicLayout() {
 
                 <main id="content" className="flex-1">
                     <Outlet />
-                    <OrderBar />
+                    <CartDock />
                 </main>
 
                 <footer className="border-t border-border">

@@ -33,9 +33,7 @@ export default function ArchivedItems() {
     return (
         <div className="flex max-w-3xl flex-col gap-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
-                <h1 className="font-display text-3xl font-extrabold">
-                    Archived items
-                </h1>
+                <h1 className="text-3xl font-bold">Archived items</h1>
                 <Button asChild variant="outline">
                     <Link to="/admin/menu">Back to menu</Link>
                 </Button>

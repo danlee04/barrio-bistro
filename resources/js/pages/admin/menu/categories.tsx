@@ -50,9 +50,7 @@ export default function Categories() {
     return (
         <div className="flex max-w-3xl flex-col gap-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
-                <h1 className="font-display text-3xl font-extrabold">
-                    Categories
-                </h1>
+                <h1 className="text-3xl font-bold">Categories</h1>
                 <div className="flex gap-2">
                     <Button asChild variant="outline">
                         <Link to="/admin/menu">Back to menu</Link>
@@ -165,10 +163,7 @@ export default function Categories() {
                     className="flex flex-col gap-3"
                     aria-labelledby="archived-categories"
                 >
-                    <h2
-                        id="archived-categories"
-                        className="font-display text-xl font-extrabold"
-                    >
+                    <h2 id="archived-categories" className="text-xl font-bold">
                         Archived
                     </h2>
                     <ul className="divide-y rounded-lg border bg-card">

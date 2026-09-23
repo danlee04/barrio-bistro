@@ -43,7 +43,7 @@ export default function Home() {
 
             <section className="bg-dahon text-pandan">
                 <div className="wrapper flex flex-col gap-10 pt-10 pb-16 md:gap-14 md:pt-16 md:pb-24">
-                    <h1 className="max-w-[12ch] font-display text-[clamp(2.75rem,1.75rem+5vw,6.5rem)] leading-[0.95] font-extrabold tracking-tight">
+                    <h1 className="max-w-[12ch] font-display text-[clamp(2.75rem,1.75rem+5vw,6.5rem)] leading-[0.95] font-bold tracking-tight">
                         On the stove {phrase}.
                     </h1>
 
@@ -102,7 +102,7 @@ export default function Home() {
                 <div className="wrapper flex flex-col gap-5 py-16 md:py-20">
                     <h2
                         id="story-heading"
-                        className="font-display text-4xl font-extrabold tracking-tight"
+                        className="font-display text-4xl font-bold tracking-tight"
                     >
                         Our story
                     </h2>
@@ -126,7 +126,7 @@ export default function Home() {
                     <div className="flex flex-col gap-5">
                         <h2
                             id="visit-heading"
-                            className="font-display text-4xl font-extrabold tracking-tight"
+                            className="font-display text-4xl font-bold tracking-tight"
                         >
                             Visit
                         </h2>
@@ -163,7 +163,7 @@ export default function Home() {
                     </div>
 
                     <div className="flex flex-col gap-4">
-                        <h3 className="font-display text-2xl font-extrabold">
+                        <h3 className="font-display text-2xl font-bold">
                             Opening hours
                         </h3>
                         <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-lg">

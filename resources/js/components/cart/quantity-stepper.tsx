@@ -27,7 +27,7 @@ export function QuantityStepper({
             </Button>
 
             <output
-                className="w-10 text-center font-display text-lg font-extrabold"
+                className="w-10 text-center font-display text-lg font-bold"
                 aria-label={`${value} ${label}`}
             >
                 {value}

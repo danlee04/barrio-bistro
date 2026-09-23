@@ -94,9 +94,7 @@ export default function Kitchen() {
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
-                <h1 className="font-display text-3xl font-extrabold tracking-tight">
-                    Kitchen
-                </h1>
+                <h1 className="text-3xl font-bold tracking-tight">Kitchen</h1>
 
                 <Button
                     type="button"
@@ -123,7 +121,7 @@ export default function Kitchen() {
                         >
                             <h2
                                 id={`column-${column.status}`}
-                                className="font-display text-xl font-extrabold"
+                                className="text-xl font-bold"
                             >
                                 {column.label}
                                 <span className="ml-2 text-muted-foreground">

@@ -47,9 +47,7 @@ export default function MenuBoard() {
         <div className="flex flex-col gap-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h1 className="font-display text-3xl font-extrabold">
-                        Menu
-                    </h1>
+                    <h1 className="text-3xl font-bold">Menu</h1>
                     <p className="text-sm text-muted-foreground">
                         {canManage
                             ? 'Manage dishes, prices and what is sold out.'
@@ -93,7 +91,7 @@ export default function MenuBoard() {
                 >
                     <h2
                         id={`category-${category.id}`}
-                        className="font-display text-xl font-extrabold"
+                        className="text-xl font-bold"
                     >
                         {category.name}
                     </h2>

@@ -3,7 +3,7 @@ import type { MenuItem } from '@/types';
 
 type PlateProps = {
     item: MenuItem;
-    size: 'hero' | 'menu';
+    size: 'hero' | 'menu' | 'card';
     priority?: boolean;
 };
 
@@ -13,6 +13,7 @@ const sizes = {
         hint: '(min-width: 768px) 176px, 144px',
     },
     menu: { box: 'size-24 md:size-28', hint: '112px' },
+    card: { box: 'size-20 md:size-24', hint: '96px' },
 };
 
 /** A dish photo served on a bilao: a round image inside a woven bamboo rim. */
@@ -39,7 +40,7 @@ export function Plate({ item, size, priority = false }: PlateProps) {
             ) : (
                 <span
                     aria-hidden="true"
-                    className="flex size-full items-center justify-center rounded-full bg-pandan font-display text-3xl font-extrabold text-dahon"
+                    className="flex size-full items-center justify-center rounded-full bg-pandan font-display text-3xl font-bold text-dahon"
                 >
                     {item.name.charAt(0)}
                 </span>

@@ -92,7 +92,7 @@ export default function OrderStatus() {
             <div className="wrapper flex flex-col gap-8 py-10">
                 <header className="flex flex-col gap-1">
                     <p className="text-lg text-muted-foreground">Your number</p>
-                    <p className="font-display text-[clamp(4rem,2rem+12vw,8rem)] leading-none font-extrabold tracking-tight">
+                    <p className="font-display text-[clamp(4rem,2rem+12vw,8rem)] leading-none font-bold tracking-tight">
                         {String(order.daily_number).padStart(4, '0')}
                     </p>
                     <p className="text-muted-foreground">
@@ -107,7 +107,7 @@ export default function OrderStatus() {
                     </p>
                 ) : order.payment_status === 'paid' ? (
                     <p className="rounded-xl border-2 border-kalamansi bg-card p-4">
-                        <span className="font-display text-xl font-extrabold">
+                        <span className="font-display text-xl font-bold">
                             Paid.
                         </span>{' '}
                         Thank you — the kitchen has your order.
@@ -115,7 +115,7 @@ export default function OrderStatus() {
                 ) : (
                     <div className="flex flex-col gap-3 rounded-xl border-2 border-achuete bg-card p-4">
                         <p>
-                            <span className="font-display text-xl font-extrabold">
+                            <span className="font-display text-xl font-bold">
                                 Not paid yet.
                             </span>{' '}
                             Show this number at the counter, or pay online now.
@@ -197,7 +197,7 @@ export default function OrderStatus() {
                             key={item.id}
                             className="flex items-start gap-4 py-4"
                         >
-                            <p className="font-display text-lg font-extrabold">
+                            <p className="font-display text-lg font-bold">
                                 {item.quantity}×
                             </p>
 
@@ -215,14 +215,14 @@ export default function OrderStatus() {
                                 )}
                             </div>
 
-                            <p className="font-display font-extrabold">
+                            <p className="font-display font-bold">
                                 {formatPeso(item.line_total)}
                             </p>
                         </li>
                     ))}
                 </ul>
 
-                <p className="font-display text-2xl font-extrabold">
+                <p className="font-display text-2xl font-bold">
                     Total {formatPeso(order.total)}
                 </p>
 

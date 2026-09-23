@@ -166,7 +166,7 @@ function MenuItemForm({
     return (
         <div className="flex max-w-3xl flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
-                <h1 className="font-display text-3xl font-extrabold">
+                <h1 className="text-3xl font-bold">
                     {item === null ? 'Add item' : `Edit ${item.name}`}
                 </h1>
                 <Button asChild variant="outline">

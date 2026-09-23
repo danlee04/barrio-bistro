@@ -29,7 +29,7 @@ export function OrderCard({
         <article className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
             <header className="flex items-start justify-between gap-3">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <p className="font-display text-3xl leading-none font-extrabold">
+                    <p className="text-3xl leading-none font-bold">
                         {String(order.daily_number).padStart(4, '0')}
                     </p>
                     <p className="font-medium">
@@ -65,9 +65,7 @@ export function OrderCard({
             <ul className="flex flex-col gap-1">
                 {order.items.map((item) => (
                     <li key={item.id} className="flex gap-2">
-                        <span className="font-display font-extrabold">
-                            {item.quantity}×
-                        </span>
+                        <span className="font-bold">{item.quantity}×</span>
                         <span className="flex min-w-0 flex-col">
                             <span>
                                 {item.item_name}
@@ -84,9 +82,7 @@ export function OrderCard({
             </ul>
 
             <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-                <p className="font-display text-lg font-extrabold">
-                    {formatPeso(order.total)}
-                </p>
+                <p className="text-lg font-bold">{formatPeso(order.total)}</p>
                 <div className="flex flex-wrap gap-2">{children}</div>
             </footer>
         </article>

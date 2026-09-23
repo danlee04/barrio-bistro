@@ -16,6 +16,10 @@
     --uling: #17110f;
     --kawayan: #cda869;
 
+    /* Deeper kalamansi: the brand green fails contrast on a white card, while
+       this step passes the dataviz validator's six checks. */
+    --chart-sales: #7d9130;
+
     --background: var(--pandan);
     --foreground: var(--uling);
     --card: #ffffff;
@@ -53,6 +57,7 @@
     --color-ube: var(--ube);
     --color-uling: var(--uling);
     --color-kawayan: var(--kawayan);
+    --color-chart-sales: var(--chart-sales);
 
     --color-background: var(--background);
     --color-foreground: var(--foreground);

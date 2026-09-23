@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\MarkOrderPaidController;
 use App\Http\Controllers\Admin\MenuItemController;
 use App\Http\Controllers\Admin\MenuItemPhotoController;
 use App\Http\Controllers\Admin\OrderStatusController;
+use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffOrderController;
 use App\Http\Controllers\Admin\StaffPasswordController;
@@ -56,6 +57,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
             Route::post('/staff', [StaffController::class, 'store'])->name('staff.store');
             Route::patch('/staff/{user}', [StaffController::class, 'update'])->name('staff.update');
             Route::put('/staff/{user}/password', StaffPasswordController::class)->name('staff.password.update');
+
+            Route::get('/reports/summary', ReportsController::class)->name('reports.summary');
 
             Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
             Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');

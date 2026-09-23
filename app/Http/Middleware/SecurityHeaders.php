@@ -65,6 +65,11 @@ class SecurityHeaders
             "default-src 'self'",
             "script-src 'self' 'nonce-{$nonce}' 'strict-dynamic'",
             "style-src {$styleSources}",
+            // Recharts writes inline style attributes on its own wrappers. This
+            // allows the attribute and nothing else: <style> blocks and
+            // stylesheets still need 'self' or the nonce, and scripts are
+            // untouched.
+            "style-src-attr 'unsafe-inline'",
             "img-src 'self' data: blob:{$devSources}",
             "font-src 'self' data:{$devSources}",
             "connect-src 'self'{$devSources}{$devSocket}",

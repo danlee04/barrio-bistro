@@ -1,13 +1,11 @@
-import { useEffect, type CSSProperties } from 'react';
-import { Link, useLocation, useRouteLoaderData } from 'react-router';
+import { useEffect } from 'react';
+import { useLocation, useRouteLoaderData } from 'react-router';
+import { Hero } from '@/components/public/hero';
 import { OpenStatus } from '@/components/public/open-status';
-import { Plate } from '@/components/public/plate';
-import { PriceList } from '@/components/public/price-list';
 import { Button } from '@/components/ui/button';
 import { dayNames, restaurant } from '@/content/restaurant';
 import { featuredItems, type publicMenuLoader } from '@/lib/public-menu';
 import { dayPart, formatClock } from '@/lib/restaurant-time';
-import { cn } from '@/lib/utils';
 
 const heroPhrase = {
     morning: 'this morning',
@@ -41,58 +39,7 @@ export default function Home() {
                 content="Filipino neighbourhood cooking. See what is on the stove today and order from your table."
             />
 
-            <section className="bg-dahon text-pandan">
-                <div className="wrapper flex flex-col gap-10 pt-10 pb-16 md:gap-14 md:pt-16 md:pb-24">
-                    <h1 className="max-w-[12ch] font-display text-[clamp(2.75rem,1.75rem+5vw,6.5rem)] leading-[0.95] font-bold tracking-tight">
-                        On the stove {phrase}.
-                    </h1>
-
-                    {plates.length > 0 ? (
-                        <ul
-                            aria-label="Cooking now"
-                            className="flex flex-wrap items-start gap-x-6 gap-y-10 md:gap-x-10"
-                        >
-                            {plates.map((item, index) => (
-                                <li
-                                    key={item.id}
-                                    className={cn(
-                                        'serve flex w-32 flex-col items-center gap-3 text-center sm:w-36 md:w-44',
-                                        index % 2 === 1 && 'md:translate-y-8',
-                                    )}
-                                    style={
-                                        {
-                                            '--serve-order': index,
-                                        } as CSSProperties
-                                    }
-                                >
-                                    <Plate
-                                        item={item}
-                                        size="hero"
-                                        priority={index < 2}
-                                    />
-                                    <p className="font-medium">{item.name}</p>
-                                    <PriceList
-                                        sizes={item.sizes}
-                                        className="justify-center text-sm"
-                                    />
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="max-w-[40ch] text-lg">
-                            Today's menu is being prepared. Check back soon.
-                        </p>
-                    )}
-
-                    <Button
-                        asChild
-                        size="lg"
-                        className="min-h-11 w-fit text-base"
-                    >
-                        <Link to="/menu">See the full menu</Link>
-                    </Button>
-                </div>
-            </section>
+            <Hero plates={plates} phrase={phrase} />
 
             <section
                 id="story"

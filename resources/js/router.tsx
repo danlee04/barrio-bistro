@@ -11,6 +11,7 @@ import {
 import { kitchenLoader, queueLoader } from '@/lib/ops';
 import { orderLoader } from '@/lib/orders';
 import { checkoutOptionsLoader } from '@/lib/payments';
+import { reportsLoader } from '@/lib/reports';
 import { publicMenuLoader } from '@/lib/public-menu';
 import { staffPageLoader } from '@/lib/staff';
 import Cart from '@/pages/cart';
@@ -67,7 +68,9 @@ export const router = createBrowserRouter([
         children: [
             {
                 index: true,
+                loader: reportsLoader,
                 lazy: page(() => import('@/pages/admin/dashboard')),
+                errorElement: <RouteError />,
             },
             {
                 path: 'orders',

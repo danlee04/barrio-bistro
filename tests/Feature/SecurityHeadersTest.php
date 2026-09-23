@@ -11,7 +11,9 @@ test('html responses carry a strict nonce-based content security policy', functi
         ->and($first)->toContain("object-src 'none'")
         ->and($first)->toContain("frame-ancestors 'none'")
         ->and($first)->toContain("form-action 'self'")
-        ->and($first)->not->toContain("'unsafe-inline'")
+        // Exactly one 'unsafe-inline' may exist, and the next test pins it to
+        // style-src-attr: scripts and stylesheets never get it.
+        ->and(substr_count((string) $first, "'unsafe-inline'"))->toBe(1)
         ->and($first)->not->toContain("'unsafe-eval'");
 });
 
@@ -49,4 +51,12 @@ test('the session cookie is http-only, same-site lax, and sessions are encrypted
         ->and($sessionCookie->isHttpOnly())->toBeTrue()
         ->and($sessionCookie->getSameSite())->toBe('lax')
         ->and(config('session.encrypt'))->toBeTrue();
+});
+
+test('inline style attributes are allowed, but injected stylesheets are not', function () {
+    $policy = $this->withoutVite()->get('/')->headers->get('Content-Security-Policy') ?? '';
+
+    expect($policy)->toContain("style-src-attr 'unsafe-inline'")
+        ->and($policy)->not->toContain("style-src 'self' 'unsafe-inline'")
+        ->and($policy)->toContain("script-src 'self' 'nonce-");
 });

@@ -23,6 +23,7 @@ class CurrentUserController extends Controller
                 'mark_paid' => $user->can('markPaid', Order::class),
                 'manage_orders' => $user->can('manageOrders', Order::class),
                 'cook_orders' => $user->can('cookOrders', Order::class),
+                'view_reports' => $user->isAdmin(),
             ],
         ]);
     }

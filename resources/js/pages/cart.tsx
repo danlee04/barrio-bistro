@@ -25,6 +25,9 @@ import type { publicMenuLoader } from '@/lib/public-menu';
 import { cn } from '@/lib/utils';
 import type { OrderType, PaymentMethod } from '@/types';
 
+const choice =
+    'flex min-h-20 flex-col justify-center rounded-xl border-2 px-4 text-left';
+
 export default function Cart() {
     const categories =
         useRouteLoaderData<typeof publicMenuLoader>('public') ?? [];
@@ -128,33 +131,193 @@ export default function Cart() {
 
             <form
                 onSubmit={handleSubmit}
-                className="wrapper flex flex-col gap-8 py-10"
+                className="wrapper grid gap-8 py-10 lg:grid-cols-[1fr_22rem] lg:items-start lg:gap-10"
             >
-                <h1 className="font-display text-4xl font-bold tracking-tight">
+                <h1 className="font-display text-4xl font-bold tracking-tight lg:col-span-2">
                     Your order
                 </h1>
 
-                <ul className="flex flex-col divide-y divide-border">
-                    {lines.map(({ line, item, size, lineTotal }, index) => (
-                        <li
-                            key={line.sizeId}
-                            className="flex flex-col gap-3 py-5"
-                        >
-                            <div className="flex items-start gap-4">
-                                <Plate item={item} size="menu" />
+                <div className="flex flex-col gap-8">
+                    <fieldset className="flex flex-col gap-3">
+                        <legend className="mb-2 font-display text-xl font-bold">
+                            Where are you eating?
+                        </legend>
 
-                                <div className="flex min-w-0 flex-1 flex-col gap-1">
-                                    <h2 className="text-lg font-semibold">
+                        <div role="group" className="grid grid-cols-2 gap-3">
+                            {(['dine_in', 'takeout'] as const).map((option) => (
+                                <button
+                                    key={option}
+                                    type="button"
+                                    aria-pressed={type === option}
+                                    onClick={() => setType(option)}
+                                    className={cn(
+                                        'min-h-14 rounded-xl border-2 px-4 font-semibold',
+                                        type === option
+                                            ? 'border-dahon bg-dahon text-pandan'
+                                            : 'border-border bg-card',
+                                    )}
+                                >
+                                    {option === 'dine_in'
+                                        ? 'Dine in'
+                                        : 'Take out'}
+                                </button>
+                            ))}
+                        </div>
+
+                        {type === 'dine_in' ? (
+                            <div className="grid gap-2">
+                                <Label htmlFor="table">Table number</Label>
+                                <Input
+                                    id="table"
+                                    type="number"
+                                    inputMode="numeric"
+                                    min={1}
+                                    value={cart.table ?? ''}
+                                    aria-invalid={
+                                        error('table_number') ? true : undefined
+                                    }
+                                    aria-describedby={
+                                        error('table_number')
+                                            ? 'table-error'
+                                            : 'table-hint'
+                                    }
+                                    onChange={(event) => {
+                                        const value = event.target.value.trim();
+
+                                        setTable(
+                                            value === ''
+                                                ? null
+                                                : Number.parseInt(value, 10),
+                                        );
+                                    }}
+                                />
+                                {error('table_number') ? (
+                                    <p
+                                        id="table-error"
+                                        className="text-sm text-destructive"
+                                    >
+                                        {error('table_number')}
+                                    </p>
+                                ) : (
+                                    <p
+                                        id="table-hint"
+                                        className="text-sm text-muted-foreground"
+                                    >
+                                        It is printed on the QR card on your
+                                        table.
+                                    </p>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">Name</Label>
+                                <Input
+                                    id="name"
+                                    value={name}
+                                    maxLength={40}
+                                    autoComplete="given-name"
+                                    aria-invalid={
+                                        error('customer_name')
+                                            ? true
+                                            : undefined
+                                    }
+                                    aria-describedby={
+                                        error('customer_name')
+                                            ? 'name-error'
+                                            : undefined
+                                    }
+                                    onChange={(event) =>
+                                        setName(event.target.value)
+                                    }
+                                />
+                                {error('customer_name') && (
+                                    <p
+                                        id="name-error"
+                                        className="text-sm text-destructive"
+                                    >
+                                        {error('customer_name')}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                    </fieldset>
+
+                    <fieldset className="flex flex-col gap-3">
+                        <legend className="mb-2 font-display text-xl font-bold">
+                            How would you like to pay?
+                        </legend>
+
+                        <div role="group" className="grid gap-3 sm:grid-cols-2">
+                            <button
+                                type="button"
+                                aria-pressed={
+                                    !onlineAvailable || method === 'counter'
+                                }
+                                onClick={() => setMethod('counter')}
+                                className={cn(
+                                    choice,
+                                    !onlineAvailable || method === 'counter'
+                                        ? 'border-dahon bg-dahon text-pandan'
+                                        : 'border-border bg-card',
+                                )}
+                            >
+                                <span className="font-display text-lg font-bold">
+                                    Pay at the counter
+                                </span>
+                                <span className="text-sm opacity-80">
+                                    The kitchen starts once it is paid.
+                                </span>
+                            </button>
+
+                            {onlineAvailable && (
+                                <button
+                                    type="button"
+                                    aria-pressed={method === 'online'}
+                                    onClick={() => setMethod('online')}
+                                    className={cn(
+                                        choice,
+                                        method === 'online'
+                                            ? 'border-dahon bg-dahon text-pandan'
+                                            : 'border-border bg-card',
+                                    )}
+                                >
+                                    <span className="font-display text-lg font-bold">
+                                        Pay online
+                                    </span>
+                                    <span className="text-sm opacity-80">
+                                        GCash or card, on PayMongo's page.
+                                    </span>
+                                </button>
+                            )}
+                        </div>
+                    </fieldset>
+                </div>
+
+                <aside className="flex flex-col gap-4 lg:sticky lg:top-6">
+                    <h2 className="font-display text-xl font-bold">
+                        {lines.length} {lines.length === 1 ? 'dish' : 'dishes'}
+                    </h2>
+
+                    <ul className="flex flex-col divide-y divide-border rounded-xl border border-border bg-card px-4">
+                        {lines.map(({ line, item, size, lineTotal }, index) => (
+                            <li
+                                key={line.sizeId}
+                                className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3"
+                            >
+                                <Plate item={item} size="chip" />
+
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-semibold">
                                         {item.name}
-                                    </h2>
-                                    <p className="text-muted-foreground">
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
                                         {item.sizes.length > 1 &&
                                             `${size.name} · `}
                                         {formatPeso(size.price)} each
                                     </p>
 
                                     {!item.is_available && (
-                                        <p className="font-semibold text-achuete">
+                                        <p className="text-xs font-semibold text-achuete">
                                             Sold out today — remove it to carry
                                             on.
                                         </p>
@@ -163,7 +326,7 @@ export default function Cart() {
                                     {error(
                                         `items.${index}.menu_item_size_id`,
                                     ) && (
-                                        <p className="font-semibold text-destructive">
+                                        <p className="text-xs font-semibold text-destructive">
                                             {error(
                                                 `items.${index}.menu_item_size_id`,
                                             )}
@@ -171,31 +334,30 @@ export default function Cart() {
                                     )}
                                 </div>
 
-                                <p className="font-display text-lg font-bold">
+                                <p className="text-sm font-semibold">
                                     {formatPeso(lineTotal)}
                                 </p>
-                            </div>
 
-                            <div className="flex flex-wrap items-center gap-3">
-                                <QuantityStepper
-                                    value={line.quantity}
-                                    label={item.name}
-                                    onChange={(quantity) =>
-                                        setQuantity(line.sizeId, quantity)
-                                    }
-                                />
+                                <div className="flex w-full items-center justify-between gap-2">
+                                    <QuantityStepper
+                                        value={line.quantity}
+                                        label={item.name}
+                                        onChange={(quantity) =>
+                                            setQuantity(line.sizeId, quantity)
+                                        }
+                                    />
 
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    className="min-h-11"
-                                    onClick={() => remove(line.sizeId)}
-                                >
-                                    Remove
-                                </Button>
-                            </div>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="min-h-11"
+                                        onClick={() => remove(line.sizeId)}
+                                    >
+                                        Remove
+                                    </Button>
+                                </div>
 
-                            <div className="grid gap-2">
                                 <Label
                                     htmlFor={`note-${line.sizeId}`}
                                     className="sr-only"
@@ -207,184 +369,48 @@ export default function Cart() {
                                     value={line.note}
                                     maxLength={MAX_NOTE}
                                     placeholder="Note for the kitchen (optional)"
+                                    className="h-9 text-sm"
                                     onChange={(event) =>
                                         setNote(line.sizeId, event.target.value)
                                     }
                                 />
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-
-                <fieldset className="flex flex-col gap-3">
-                    <legend className="mb-2 font-display text-xl font-bold">
-                        Where are you eating?
-                    </legend>
-
-                    <div role="group" className="grid grid-cols-2 gap-3">
-                        {(['dine_in', 'takeout'] as const).map((option) => (
-                            <button
-                                key={option}
-                                type="button"
-                                aria-pressed={type === option}
-                                onClick={() => setType(option)}
-                                className={cn(
-                                    'min-h-14 rounded-xl border-2 px-4 font-semibold',
-                                    type === option
-                                        ? 'border-dahon bg-dahon text-pandan'
-                                        : 'border-border bg-card',
-                                )}
-                            >
-                                {option === 'dine_in' ? 'Dine in' : 'Take out'}
-                            </button>
+                            </li>
                         ))}
-                    </div>
+                    </ul>
 
-                    {type === 'dine_in' ? (
-                        <div className="grid gap-2">
-                            <Label htmlFor="table">Table number</Label>
-                            <Input
-                                id="table"
-                                type="number"
-                                inputMode="numeric"
-                                min={1}
-                                value={cart.table ?? ''}
-                                aria-invalid={
-                                    error('table_number') ? true : undefined
-                                }
-                                aria-describedby={
-                                    error('table_number')
-                                        ? 'table-error'
-                                        : 'table-hint'
-                                }
-                                onChange={(event) => {
-                                    const value = event.target.value.trim();
-
-                                    setTable(
-                                        value === ''
-                                            ? null
-                                            : Number.parseInt(value, 10),
-                                    );
-                                }}
-                            />
-                            {error('table_number') ? (
-                                <p
-                                    id="table-error"
-                                    className="text-sm text-destructive"
-                                >
-                                    {error('table_number')}
-                                </p>
-                            ) : (
-                                <p
-                                    id="table-hint"
-                                    className="text-sm text-muted-foreground"
-                                >
-                                    It is printed on the QR card on your table.
-                                </p>
-                            )}
+                    <div className="sticky bottom-0 z-10 flex flex-col gap-3 rounded-xl border border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lg lg:static lg:shadow-none">
+                        <div className="flex items-center justify-between">
+                            <p className="font-medium">Total</p>
+                            <p className="font-display text-2xl font-bold">
+                                {formatPeso(subtotal)}
+                            </p>
                         </div>
-                    ) : (
-                        <div className="grid gap-2">
-                            <Label htmlFor="name">Name</Label>
-                            <Input
-                                id="name"
-                                value={name}
-                                maxLength={40}
-                                autoComplete="given-name"
-                                aria-invalid={
-                                    error('customer_name') ? true : undefined
-                                }
-                                aria-describedby={
-                                    error('customer_name')
-                                        ? 'name-error'
-                                        : undefined
-                                }
-                                onChange={(event) =>
-                                    setName(event.target.value)
-                                }
-                            />
-                            {error('customer_name') && (
-                                <p
-                                    id="name-error"
-                                    className="text-sm text-destructive"
-                                >
-                                    {error('customer_name')}
-                                </p>
-                            )}
-                        </div>
-                    )}
-                </fieldset>
 
-                <fieldset className="flex flex-col gap-3">
-                    <legend className="mb-2 font-display text-xl font-bold">
-                        How would you like to pay?
-                    </legend>
+                        {soldOut > 0 && (
+                            <p className="text-sm font-semibold text-achuete">
+                                Remove the sold-out dishes to carry on.
+                            </p>
+                        )}
 
-                    <div role="group" className="grid gap-3 sm:grid-cols-2">
-                        <button
-                            type="button"
-                            aria-pressed={
-                                !onlineAvailable || method === 'counter'
-                            }
-                            onClick={() => setMethod('counter')}
-                            className={cn(
-                                'flex min-h-20 flex-col justify-center rounded-xl border-2 px-4 text-left',
-                                !onlineAvailable || method === 'counter'
-                                    ? 'border-dahon bg-dahon text-pandan'
-                                    : 'border-border bg-card',
-                            )}
+                        <Button
+                            type="submit"
+                            size="lg"
+                            className="min-h-12 w-full rounded-full text-base"
+                            disabled={placing || soldOut > 0}
                         >
-                            <span className="font-display text-lg font-bold">
-                                Pay at the counter
-                            </span>
-                            <span className="text-sm opacity-80">
-                                The kitchen starts once it is paid.
-                            </span>
-                        </button>
+                            {placing ? 'Placing…' : 'Place order'}
+                        </Button>
 
-                        {onlineAvailable && (
-                            <button
-                                type="button"
-                                aria-pressed={method === 'online'}
-                                onClick={() => setMethod('online')}
-                                className={cn(
-                                    'flex min-h-20 flex-col justify-center rounded-xl border-2 px-4 text-left',
-                                    method === 'online'
-                                        ? 'border-dahon bg-dahon text-pandan'
-                                        : 'border-border bg-card',
-                                )}
+                        {message && (
+                            <p
+                                role="alert"
+                                className="text-sm font-semibold text-destructive"
                             >
-                                <span className="font-display text-lg font-bold">
-                                    Pay online
-                                </span>
-                                <span className="text-sm opacity-80">
-                                    GCash or card, on PayMongo's page.
-                                </span>
-                            </button>
+                                {message}
+                            </p>
                         )}
                     </div>
-                </fieldset>
-
-                <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
-                    <p className="font-display text-2xl font-bold">
-                        Total {formatPeso(subtotal)}
-                    </p>
-
-                    <Button
-                        type="submit"
-                        size="lg"
-                        className="min-h-14 rounded-full px-8 text-lg"
-                        disabled={placing || soldOut > 0}
-                    >
-                        {placing ? 'Placing…' : 'Place order'}
-                    </Button>
-                </div>
-
-                {message && (
-                    <p role="alert" className="font-semibold text-destructive">
-                        {message}
-                    </p>
-                )}
+                </aside>
             </form>
         </>
     );

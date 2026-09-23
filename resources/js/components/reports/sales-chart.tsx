@@ -1,6 +1,6 @@
 import {
-    Bar,
-    BarChart,
+    Area,
+    AreaChart,
     CartesianGrid,
     ResponsiveContainer,
     Tooltip,
@@ -43,9 +43,10 @@ function DayTooltip({ active, payload }: TooltipProps) {
 }
 
 /**
- * One series, so the heading names it and no legend is needed. The bars carry
- * the shape of the week; the table under them carries the numbers for anyone
- * who cannot read bars.
+ * One series, so the heading names it and no legend is needed. The curve is
+ * monotone rather than a loose spline: a smooth line that cannot dip below the
+ * days it joins, so a quiet Tuesday never looks like a loss. The table under it
+ * carries the same numbers for anyone who cannot read a line.
  */
 export function SalesChart({ days }: { days: DaySales[] }) {
     return (
@@ -54,7 +55,7 @@ export function SalesChart({ days }: { days: DaySales[] }) {
 
             <div aria-hidden="true" className="h-60 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
+                    <AreaChart
                         data={days}
                         margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
                     >
@@ -82,16 +83,31 @@ export function SalesChart({ days }: { days: DaySales[] }) {
                             }}
                         />
                         <Tooltip
-                            cursor={{ fill: 'var(--color-muted)' }}
+                            cursor={{
+                                stroke: 'var(--color-muted-foreground)',
+                                strokeWidth: 1,
+                            }}
                             content={<DayTooltip />}
                         />
-                        <Bar
+                        <Area
+                            type="monotone"
                             dataKey="sales"
+                            stroke="var(--color-chart-sales)"
+                            strokeWidth={2}
                             fill="var(--color-chart-sales)"
-                            radius={[4, 4, 0, 0]}
-                            maxBarSize={44}
+                            fillOpacity={0.12}
+                            dot={{
+                                r: 4,
+                                strokeWidth: 0,
+                                fill: 'var(--color-chart-sales)',
+                            }}
+                            activeDot={{
+                                r: 6,
+                                strokeWidth: 2,
+                                stroke: 'var(--color-card)',
+                            }}
                         />
-                    </BarChart>
+                    </AreaChart>
                 </ResponsiveContainer>
             </div>
 

@@ -1,5 +1,5 @@
 import { ShoppingBag, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Dialog as DialogPrimitive } from 'radix-ui';
 import { useLocation, useNavigate, useRouteLoaderData } from 'react-router';
 import { QuantityStepper } from '@/components/cart/quantity-stepper';
@@ -11,6 +11,7 @@ import { MAX_NOTE, priceCart } from '@/lib/cart';
 import { useCart } from '@/lib/cart-context';
 import { formatPeso } from '@/lib/money';
 import type { publicMenuLoader } from '@/lib/public-menu';
+import { cn } from '@/lib/utils';
 
 /**
  * The order hangs in the corner and opens as a panel on the right, the way a
@@ -30,29 +31,43 @@ export function CartDock() {
         0,
     );
 
+    // A dish just landed here: say so with a small bump.
+    const [bumping, setBumping] = useState(false);
+    const seen = useRef(count);
+
+    useEffect(() => {
+        if (count > seen.current) {
+            setBumping(true);
+        }
+
+        seen.current = count;
+    }, [count]);
+
     if (count === 0 || pathname === '/cart') {
         return null;
     }
 
     return (
         <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
-            {/* Keeps the footer clear of the button that floats above it. */}
+            {/* Keeps the footer clear of the button hanging over it. */}
             <div aria-hidden="true" className="h-20" />
 
             <DialogPrimitive.Trigger asChild>
                 <button
                     type="button"
-                    className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 inline-flex min-h-14 items-center gap-3 rounded-full bg-achuete pr-5 pl-4 font-semibold text-white shadow-lg"
+                    onAnimationEnd={() => setBumping(false)}
+                    aria-label={`Open your order: ${count} ${count === 1 ? 'item' : 'items'}, ${formatPeso(subtotal)}`}
+                    className={cn(
+                        'fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 inline-flex size-14 items-center justify-center rounded-full bg-achuete text-white shadow-lg',
+                        bumping && 'cart-bump',
+                    )}
                 >
-                    <span className="relative">
-                        <ShoppingBag aria-hidden="true" className="size-6" />
-                        <span className="absolute -top-2 -right-2 inline-flex size-5 items-center justify-center rounded-full bg-dahon text-xs text-pandan">
-                            {count}
-                        </span>
-                    </span>
-                    {formatPeso(subtotal)}
-                    <span className="sr-only">
-                        {`Open your order: ${count} ${count === 1 ? 'item' : 'items'}`}
+                    <ShoppingBag aria-hidden="true" className="size-6" />
+                    <span
+                        aria-hidden="true"
+                        className="absolute -top-1 -right-1 inline-flex min-w-6 items-center justify-center rounded-full border-2 border-pandan bg-dahon px-1 text-xs font-semibold text-pandan"
+                    >
+                        {count}
                     </span>
                 </button>
             </DialogPrimitive.Trigger>
@@ -62,7 +77,7 @@ export function CartDock() {
 
                 <DialogPrimitive.Content
                     aria-describedby={undefined}
-                    className="cart-panel fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col bg-card shadow-2xl"
+                    className="cart-panel fixed inset-y-0 right-0 z-50 flex w-full max-w-88 flex-col bg-card shadow-2xl"
                 >
                     <header className="flex items-center justify-between gap-4 border-b border-border p-4">
                         <DialogPrimitive.Title className="font-display text-2xl font-bold">

@@ -3,7 +3,7 @@ import type { MenuItem } from '@/types';
 
 type PlateProps = {
     item: MenuItem;
-    size: 'hero' | 'menu' | 'card' | 'chip' | 'feature';
+    size: 'hero' | 'menu' | 'card' | 'chip' | 'tile' | 'feature';
     priority?: boolean;
 };
 
@@ -15,6 +15,7 @@ const sizes = {
     menu: { box: 'size-24 md:size-28', hint: '112px' },
     card: { box: 'size-20 md:size-24', hint: '96px' },
     chip: { box: 'size-10', hint: '40px' },
+    tile: { box: 'size-16 sm:size-20', hint: '80px' },
     feature: {
         box: 'size-56 sm:size-72 md:size-96',
         hint: '(min-width: 768px) 384px, 288px',

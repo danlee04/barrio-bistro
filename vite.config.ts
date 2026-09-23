@@ -13,6 +13,9 @@ export default defineConfig({
             fonts: [
                 bunny('Google Sans', {
                     weights: [400, 500, 600, 700],
+                    // Never show another face: the browser holds the text back
+                    // until Google Sans is here, rather than swapping mid-read.
+                    display: 'block',
                 }),
             ],
         }),

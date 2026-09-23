@@ -43,11 +43,10 @@
 
 @theme inline {
     /* One face for every screen, guest and staff alike. Its heaviest cut is
-       700, so headings use bold rather than extrabold. */
-    --font-sans:
-        'Google Sans', ui-sans-serif, system-ui, sans-serif,
-        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
+       700, so headings use bold rather than extrabold. The lone `sans-serif`
+       is not a second face: it is what the browser falls back to only if the
+       font file never arrives at all, so the page is never served in Times. */
+    --font-sans: 'Google Sans', sans-serif;
     --font-display: var(--font-sans);
 
     --color-dahon: var(--dahon);
@@ -131,6 +130,11 @@
         .plate-lift {
             animation: plate-lift 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
         }
+
+        /* The order in the corner answers back when a dish lands in it. */
+        .cart-bump {
+            animation: cart-bump 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
     }
 
     @media (prefers-reduced-motion: no-preference) {
@@ -156,6 +160,16 @@
 @keyframes plate-lift {
     50% {
         transform: translateY(-0.9rem) rotate(-6deg) scale(1.05);
+    }
+}
+
+@keyframes cart-bump {
+    35% {
+        transform: scale(1.12);
+    }
+
+    70% {
+        transform: scale(0.97);
     }
 }
 

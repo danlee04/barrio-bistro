@@ -53,6 +53,8 @@ export type OrderItem = {
     note: string | null;
 };
 
+export type OpsView = 'queue' | 'kitchen' | 'done';
+
 export type Order = {
     token: string;
     order_number: string;
@@ -70,4 +72,8 @@ export type Order = {
     total: number;
     placed_at: string | null;
     items: OrderItem[];
+};
+
+export type StaffOrder = Omit<Order, 'subtotal'> & {
+    paid_at: string | null;
 };

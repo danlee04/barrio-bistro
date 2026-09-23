@@ -16,6 +16,9 @@ export type Abilities = {
     manage_staff: boolean;
     manage_menu: boolean;
     update_availability: boolean;
+    mark_paid: boolean;
+    manage_orders: boolean;
+    cook_orders: boolean;
 };
 
 export type CurrentUser = {

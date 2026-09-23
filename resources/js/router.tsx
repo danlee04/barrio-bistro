@@ -8,6 +8,7 @@ import {
     menuBoardLoader,
     menuItemFormLoader,
 } from '@/lib/menu';
+import { kitchenLoader, queueLoader } from '@/lib/ops';
 import { orderLoader } from '@/lib/orders';
 import { checkoutOptionsLoader } from '@/lib/payments';
 import { publicMenuLoader } from '@/lib/public-menu';
@@ -67,6 +68,18 @@ export const router = createBrowserRouter([
             {
                 index: true,
                 lazy: page(() => import('@/pages/admin/dashboard')),
+            },
+            {
+                path: 'orders',
+                loader: queueLoader,
+                lazy: page(() => import('@/pages/admin/orders')),
+                errorElement: <RouteError />,
+            },
+            {
+                path: 'kitchen',
+                loader: kitchenLoader,
+                lazy: page(() => import('@/pages/admin/kitchen')),
+                errorElement: <RouteError />,
             },
             {
                 path: 'menu',

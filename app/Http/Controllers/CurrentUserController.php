@@ -21,6 +21,8 @@ class CurrentUserController extends Controller
                 'manage_menu' => $user->can('create', MenuItem::class),
                 'update_availability' => $user->can('updateAvailability', MenuItem::class),
                 'mark_paid' => $user->can('markPaid', Order::class),
+                'manage_orders' => $user->can('manageOrders', Order::class),
+                'cook_orders' => $user->can('cookOrders', Order::class),
             ],
         ]);
     }

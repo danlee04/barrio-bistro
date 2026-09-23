@@ -33,4 +33,21 @@ enum OrderStatus: string
     {
         return ! in_array($this, [self::Completed, self::Cancelled], true);
     }
+
+    /**
+     * Where an order may go from here. `confirmed` appears only as the step
+     * paying takes it to: no staff move ever produces it.
+     *
+     * @return list<self>
+     */
+    public function allowedNext(): array
+    {
+        return match ($this) {
+            self::Pending => [self::Confirmed, self::Cancelled],
+            self::Confirmed => [self::Preparing],
+            self::Preparing => [self::Ready],
+            self::Ready => [self::Completed],
+            self::Completed, self::Cancelled => [],
+        };
+    }
 }

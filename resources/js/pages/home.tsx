@@ -1,5 +1,5 @@
 import { useEffect, type CSSProperties } from 'react';
-import { Link, useLoaderData, useLocation } from 'react-router';
+import { Link, useLocation, useRouteLoaderData } from 'react-router';
 import { OpenStatus } from '@/components/public/open-status';
 import { Plate } from '@/components/public/plate';
 import { PriceList } from '@/components/public/price-list';
@@ -19,7 +19,8 @@ const heroPhrase = {
 const weekOrder = [1, 2, 3, 4, 5, 6, 0];
 
 export default function Home() {
-    const categories = useLoaderData<typeof publicMenuLoader>();
+    const categories =
+        useRouteLoaderData<typeof publicMenuLoader>('public') ?? [];
     const plates = featuredItems(categories);
     const phrase = heroPhrase[dayPart(new Date(), restaurant.timeZone)];
     const location = useLocation();

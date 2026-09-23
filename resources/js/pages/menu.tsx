@@ -1,11 +1,11 @@
-import { useLoaderData } from 'react-router';
-import { Plate } from '@/components/public/plate';
-import { PriceList } from '@/components/public/price-list';
+import { useRouteLoaderData } from 'react-router';
+import { MenuRow } from '@/components/public/menu-row';
 import { restaurant } from '@/content/restaurant';
 import type { publicMenuLoader } from '@/lib/public-menu';
 
 export default function Menu() {
-    const categories = useLoaderData<typeof publicMenuLoader>();
+    const categories =
+        useRouteLoaderData<typeof publicMenuLoader>('public') ?? [];
 
     return (
         <>
@@ -69,31 +69,7 @@ export default function Menu() {
 
                                 <ul className="grid gap-x-10 gap-y-8 md:grid-cols-2">
                                     {category.items.map((item) => (
-                                        <li
-                                            key={item.id}
-                                            className="flex items-start gap-4"
-                                        >
-                                            <Plate item={item} size="menu" />
-                                            <div className="flex min-w-0 flex-col gap-2">
-                                                <h3 className="text-lg leading-snug font-semibold">
-                                                    {item.name}
-                                                </h3>
-                                                {item.description && (
-                                                    <p className="line-clamp-3 text-muted-foreground">
-                                                        {item.description}
-                                                    </p>
-                                                )}
-                                                {item.is_available ? (
-                                                    <PriceList
-                                                        sizes={item.sizes}
-                                                    />
-                                                ) : (
-                                                    <p className="font-semibold text-achuete">
-                                                        Sold out today
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </li>
+                                        <MenuRow key={item.id} item={item} />
                                     ))}
                                 </ul>
                             </section>

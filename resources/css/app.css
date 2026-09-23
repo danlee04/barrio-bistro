@@ -112,6 +112,13 @@
         opacity: 0.55;
     }
 
+    /* The one motion moment: a plate lifting as it joins the order. */
+    @media (prefers-reduced-motion: no-preference) {
+        .plate-lift {
+            animation: plate-lift 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+    }
+
     @media (prefers-reduced-motion: no-preference) {
         .serve {
             animation: serve 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -129,5 +136,11 @@
     to {
         opacity: 1;
         transform: none;
+    }
+}
+
+@keyframes plate-lift {
+    50% {
+        transform: translateY(-0.9rem) rotate(-6deg) scale(1.05);
     }
 }

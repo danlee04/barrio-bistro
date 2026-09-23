@@ -8,11 +8,14 @@ import {
     menuBoardLoader,
     menuItemFormLoader,
 } from '@/lib/menu';
+import { orderLoader } from '@/lib/orders';
 import { publicMenuLoader } from '@/lib/public-menu';
 import { staffPageLoader } from '@/lib/staff';
+import Cart from '@/pages/cart';
 import Home from '@/pages/home';
 import Menu from '@/pages/menu';
 import NotFound from '@/pages/not-found';
+import OrderStatus from '@/pages/order-status';
 import RouteError from '@/pages/route-error';
 
 /**
@@ -25,11 +28,20 @@ function page(load: () => Promise<{ default: ComponentType }>) {
 
 export const router = createBrowserRouter([
     {
+        id: 'public',
         element: <PublicLayout />,
         errorElement: <RouteError />,
+        loader: publicMenuLoader,
         children: [
-            { path: '/', element: <Home />, loader: publicMenuLoader },
-            { path: '/menu', element: <Menu />, loader: publicMenuLoader },
+            { path: '/', element: <Home /> },
+            { path: '/menu', element: <Menu /> },
+            { path: '/cart', element: <Cart /> },
+            {
+                path: '/order/:token',
+                loader: orderLoader,
+                element: <OrderStatus />,
+                errorElement: <RouteError />,
+            },
             { path: '*', element: <NotFound /> },
         ],
     },

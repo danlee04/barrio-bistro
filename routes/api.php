@@ -8,10 +8,16 @@ use App\Http\Controllers\Admin\StaffPasswordController;
 use App\Http\Controllers\CurrentUserController;
 use App\Http\Controllers\CurrentUserPasswordController;
 use App\Http\Controllers\MenuItemAvailabilityController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PublicMenuController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/menu', PublicMenuController::class)->name('menu.show');
+
+Route::post('/orders', [OrderController::class, 'store'])
+    ->middleware('throttle:orders')
+    ->name('orders.store');
+Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/me', CurrentUserController::class)->name('me.show');

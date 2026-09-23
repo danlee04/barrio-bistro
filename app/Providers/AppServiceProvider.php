@@ -75,6 +75,18 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(20)
             ->by($request->ip()));
+
+        // A restaurant full of guests shares one connection, so the tighter
+        // limit is per device and the looser one per address.
+        RateLimiter::for('orders', function (Request $request): array {
+            $limits = [Limit::perMinute(30)->by('ip:'.$request->ip())];
+
+            if ($request->hasSession()) {
+                $limits[] = Limit::perMinute(6)->by('device:'.$request->session()->getId());
+            }
+
+            return $limits;
+        });
     }
 
     /**

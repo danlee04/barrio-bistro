@@ -3,6 +3,8 @@ import { InquiryForm } from '@/components/public/inquiry-form';
 import { Button } from '@/components/ui/button';
 import { restaurant } from '@/content/restaurant';
 import { useHashScroll } from '@/lib/hash-scroll';
+import { tiltFor } from '@/lib/pinned';
+import { cn } from '@/lib/utils';
 
 const ways = [
     {
@@ -54,11 +56,14 @@ export default function Offers() {
             </section>
 
             <div className="wrapper flex flex-col gap-12 py-12 md:py-16">
-                <ul className="grid gap-8 md:grid-cols-3">
-                    {ways.map((way) => (
+                <ul className="grid gap-6 md:grid-cols-3">
+                    {ways.map((way, index) => (
                         <li
                             key={way.title}
-                            className="flex flex-col gap-3 border-l-2 border-dahon pl-5"
+                            className={cn(
+                                'pinned flex flex-col gap-3 p-6 pt-9',
+                                tiltFor(index),
+                            )}
                         >
                             <h2 className="font-display text-2xl font-bold">
                                 {way.title}

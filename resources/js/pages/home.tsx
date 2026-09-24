@@ -9,8 +9,10 @@ import { Testimonials } from '@/components/public/testimonials';
 import { Button } from '@/components/ui/button';
 import { restaurant } from '@/content/restaurant';
 import { useHashScroll } from '@/lib/hash-scroll';
+import { tiltFor } from '@/lib/pinned';
 import { featuredItems, type publicMenuLoader } from '@/lib/public-menu';
 import { dayPart } from '@/lib/restaurant-time';
+import { cn } from '@/lib/utils';
 
 const heroPhrase = {
     morning: 'this morning',
@@ -66,11 +68,14 @@ export default function Home() {
                         What we serve
                     </h2>
 
-                    <ul className="grid gap-4 md:grid-cols-3">
-                        {offers.map((offer) => (
+                    <ul className="grid gap-6 md:grid-cols-3">
+                        {offers.map((offer, index) => (
                             <li
                                 key={offer.title}
-                                className="flex flex-col gap-3 rounded-xl border border-border bg-card p-6"
+                                className={cn(
+                                    'pinned flex flex-col gap-3 p-6 pt-9',
+                                    tiltFor(index),
+                                )}
                             >
                                 <offer.icon
                                     aria-hidden="true"

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { formatPeso } from '@/lib/money';
 import { elapsedLabel, HURRY_MINUTES, minutesWaiting } from '@/lib/ops';
+import { tiltFor } from '@/lib/pinned';
 import { cn } from '@/lib/utils';
 import type { OrderStatus, StaffOrder } from '@/types';
 
@@ -15,19 +16,6 @@ type OrderCardProps = {
 
 /** Orders nobody is waiting on any more: lateness means nothing here. */
 const settled: OrderStatus[] = ['completed', 'cancelled'];
-
-/**
- * How far each ticket leans. Picked from the order's own number rather than at
- * random, so a note never jumps to a new angle while someone is reading it.
- * The swing on hover leans off whichever angle the paper already has.
- */
-const tilts = [
-    '[--tilt:-2deg]',
-    '[--tilt:1deg]',
-    '[--tilt:0deg]',
-    '[--tilt:2deg]',
-    '[--tilt:-1deg]',
-];
 
 /** One order, as both the counter and the kitchen read it. */
 export function OrderCard({
@@ -52,9 +40,9 @@ export function OrderCard({
     return (
         <article
             className={cn(
-                'ticket flex flex-col gap-2.5 p-3 pt-5',
-                tilts[order.daily_number % tilts.length],
-                late && 'ticket-late',
+                'pinned flex flex-col gap-2.5 p-3 pt-5',
+                tiltFor(order.daily_number),
+                late && 'pinned-alert',
             )}
         >
             <header className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">

@@ -247,10 +247,10 @@
         }
     }
 
-    /* An order as a scrap of paper tacked to the kitchen wall. The corners
-       are uneven because nobody cut them, and it hangs from the tack, so it
-       swings when you reach for it. */
-    .ticket {
+    /* A scrap of paper tacked to the wall: an order in the kitchen, a thing
+       the shop does on the website. The corners are uneven because nobody cut
+       them, and it hangs from the tack, so it swings when you reach for it. */
+    .pinned {
         --tilt: 0deg;
         position: relative;
         background: var(--papel);
@@ -265,12 +265,12 @@
     }
 
     /* Been up on the wall too long; the paper says so as well as the clock. */
-    .ticket-late {
+    .pinned-alert {
         background: color-mix(in oklab, var(--achuete) 12%, var(--papel));
     }
 
     /* The grain of cheap paper, laid over everything on it. */
-    .ticket::after {
+    .pinned::after {
         content: '';
         position: absolute;
         inset: 0;
@@ -290,7 +290,7 @@
     }
 
     /* The tack. */
-    .ticket::before {
+    .pinned::before {
         content: '';
         position: absolute;
         z-index: 1;
@@ -311,7 +311,7 @@
     }
 
     /* Reaching for it lifts it off the wall. */
-    .ticket:hover {
+    .pinned:hover {
         z-index: 1;
         box-shadow:
             0 2px 2px color-mix(in oklab, var(--uling) 16%, transparent),
@@ -320,8 +320,8 @@
 
     /* And it swings on the tack, because that is the only thing holding it. */
     @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-        .ticket:hover {
-            animation: ticket-swing 700ms cubic-bezier(0.25, 0.8, 0.3, 1);
+        .pinned:hover {
+            animation: pin-swing 700ms cubic-bezier(0.25, 0.8, 0.3, 1);
         }
     }
 
@@ -378,7 +378,7 @@
     }
 }
 
-@keyframes ticket-swing {
+@keyframes pin-swing {
     25% {
         rotate: calc(var(--tilt) + 3deg);
     }

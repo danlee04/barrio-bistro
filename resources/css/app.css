@@ -4,6 +4,62 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
 /*
+ * Google Sans, self-hosted from `resources/fonts`.
+ *
+ * The files live in the repository and are declared here rather than fetched
+ * by a build plugin, because the plugin only writes its font manifest for a
+ * production build: with `npm run dev` there were no @font-face rules at all
+ * and every screen quietly fell back to the system sans. Declared here, the
+ * face is identical in dev, in the build, and offline.
+ *
+ * No `unicode-range`: there is one file per weight, so the browser should
+ * reach for it whatever the character is.
+ */
+@font-face {
+    font-family: 'Google Sans';
+    font-style: normal;
+    font-weight: 400;
+    /* Hold the text back until the face is here rather than swap mid-read. */
+    font-display: block;
+    src:
+        url('../fonts/google-sans-400.woff2') format('woff2'),
+        url('../fonts/google-sans-400.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Google Sans';
+    font-style: normal;
+    font-weight: 500;
+    /* Hold the text back until the face is here rather than swap mid-read. */
+    font-display: block;
+    src:
+        url('../fonts/google-sans-500.woff2') format('woff2'),
+        url('../fonts/google-sans-500.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Google Sans';
+    font-style: normal;
+    font-weight: 600;
+    /* Hold the text back until the face is here rather than swap mid-read. */
+    font-display: block;
+    src:
+        url('../fonts/google-sans-600.woff2') format('woff2'),
+        url('../fonts/google-sans-600.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Google Sans';
+    font-style: normal;
+    font-weight: 700;
+    /* Hold the text back until the face is here rather than swap mid-read. */
+    font-display: block;
+    src:
+        url('../fonts/google-sans-700.woff2') format('woff2'),
+        url('../fonts/google-sans-700.woff') format('woff');
+}
+
+/*
  * Bilao palette: colors taken from the food itself.
  * The brand tokens are mapped onto shadcn's semantic variables below.
  */
@@ -99,6 +155,80 @@
 }
 
 @layer components {
+    /* At the top of the page the navigation is simply the hero's own green:
+       one unbroken band, nothing between the name and the picture. The glass
+       only appears once the page has moved under it. */
+    .nav-glass {
+        position: relative;
+        background: var(--dahon);
+        border-bottom: 1px solid transparent;
+    }
+
+    .nav-glass[data-stuck='true'] {
+        background: color-mix(in oklab, var(--dahon) 92%, transparent);
+        border-bottom-color: color-mix(
+            in oklab,
+            var(--pandan) 16%,
+            transparent
+        );
+        box-shadow: 0 0.6rem 1.6rem -0.9rem
+            color-mix(in oklab, var(--uling) 80%, transparent);
+    }
+
+    @supports (backdrop-filter: blur(1px)) {
+        .nav-glass[data-stuck='true'] {
+            background: color-mix(in oklab, var(--dahon) 64%, transparent);
+            backdrop-filter: blur(16px) saturate(1.5);
+        }
+    }
+
+    /* The gloss: a sheen down the pane, and light caught on its top edge. */
+    .nav-glass::before,
+    .nav-glass::after {
+        content: '';
+        position: absolute;
+        inset: 0 0 auto;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .nav-glass[data-stuck='true']::before,
+    .nav-glass[data-stuck='true']::after {
+        opacity: 1;
+    }
+
+    .nav-glass::before {
+        height: 60%;
+        background: linear-gradient(
+            to bottom,
+            color-mix(in oklab, white 16%, transparent),
+            transparent
+        );
+    }
+
+    .nav-glass::after {
+        height: 1px;
+        background: linear-gradient(
+            to right,
+            transparent,
+            color-mix(in oklab, white 40%, transparent),
+            transparent
+        );
+    }
+
+    /* The glass comes and goes; it never slides. */
+    @media (prefers-reduced-motion: no-preference) {
+        .nav-glass,
+        .nav-glass::before,
+        .nav-glass::after {
+            transition:
+                background-color 220ms ease,
+                border-color 220ms ease,
+                box-shadow 220ms ease,
+                opacity 220ms ease;
+        }
+    }
+
     /* A plate on a bilao: the photo sits inside a woven bamboo rim. */
     .plate {
         position: relative;

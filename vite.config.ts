@@ -2,7 +2,6 @@ import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
-import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig, lazyPlugins } from 'vite-plus';
 
 export default defineConfig({
@@ -10,14 +9,6 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
             refresh: true,
-            fonts: [
-                bunny('Google Sans', {
-                    weights: [400, 500, 600, 700],
-                    // Never show another face: the browser holds the text back
-                    // until Google Sans is here, rather than swapping mid-read.
-                    display: 'block',
-                }),
-            ],
         }),
         react(),
         babel({

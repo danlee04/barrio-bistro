@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, ScrollRestoration } from 'react-router';
 import { RecentOrderLink } from '@/components/cart/recent-order-link';
 import { OpenStatus } from '@/components/public/open-status';
@@ -15,10 +16,32 @@ const links = [
 
 /** The same shape as a nav link, for the one that jumps to a section. */
 const linkClasses =
-    'inline-flex min-h-11 items-center rounded-full px-3 font-medium hover:bg-pandan/15';
+    'relative inline-flex min-h-11 items-center rounded-full px-4 font-medium text-pandan/90 transition-colors hover:bg-pandan/15 hover:text-pandan';
+
+/** The link for the page you are already on: lit, like a pressed key. */
+const activeClasses =
+    'bg-pandan text-dahon shadow-sm hover:bg-pandan hover:text-dahon';
+
+/** How far the page must move before the navigation turns to glass. */
+const GLASS_AT = 8;
 
 /** The website a visitor reads. The cart lives in the till, not here. */
 export default function MarketingLayout() {
+    const [stuck, setStuck] = useState(false);
+
+    // At rest the bar is the hero's own green; it frosts once the page slides
+    // under it, so there is something worth seeing through.
+    useEffect(() => {
+        function onScroll() {
+            setStuck(window.scrollY > GLASS_AT);
+        }
+
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
     return (
         <div className="flex min-h-svh flex-col bg-pandan text-uling">
             <a
@@ -28,7 +51,10 @@ export default function MarketingLayout() {
                 Skip to content
             </a>
 
-            <header className="bg-dahon text-pandan">
+            <header
+                data-stuck={stuck}
+                className="nav-glass sticky top-0 z-40 text-pandan"
+            >
                 <div className="wrapper flex min-h-16 flex-wrap items-center gap-x-4 gap-y-1 py-3 md:grid md:grid-cols-[auto_1fr_auto]">
                     <Link
                         to="/"
@@ -59,7 +85,7 @@ export default function MarketingLayout() {
                                         className={({ isActive }) =>
                                             cn(
                                                 linkClasses,
-                                                isActive && 'bg-pandan/15',
+                                                isActive && activeClasses,
                                             )
                                         }
                                     >

@@ -33,7 +33,7 @@ export default function OrderLayout() {
                         ) : (
                             <Link
                                 to="/"
-                                className="font-display text-xl font-bold tracking-tight"
+                                className="-mx-3 inline-flex min-h-11 items-center rounded-full px-3 font-display text-xl font-bold tracking-tight transition-colors hover:bg-pandan/15"
                             >
                                 {restaurant.name}
                             </Link>

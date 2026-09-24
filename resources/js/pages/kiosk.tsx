@@ -35,13 +35,16 @@ export default function Kiosk() {
         forgetOrder();
     }, []);
 
-    // `/kiosk?setup=1` is how the shop turns this tablet into the kiosk.
+    // `/kiosk?setup=1` turns this tablet into the kiosk; `?setup=0` hands it
+    // back, so a device is never stuck in kiosk mode with no way out.
     useEffect(() => {
-        if (searchParams.get('setup') !== '1') {
+        const setup = searchParams.get('setup');
+
+        if (setup !== '1' && setup !== '0') {
             return;
         }
 
-        setKiosk(true);
+        setKiosk(setup === '1');
 
         const next = new URLSearchParams(searchParams);
         next.delete('setup');

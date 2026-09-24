@@ -1,5 +1,6 @@
 import { Check, Plus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { DishPhoto } from '@/components/public/dish-photo';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/lib/cart-context';
 import { formatPeso } from '@/lib/money';
@@ -16,48 +17,10 @@ function sizeInitial(name: string): string {
     return /\p{L}/u.test(first) ? first.toUpperCase() : name;
 }
 
-function DishPhoto({ item }: { item: MenuItem }) {
-    const frame = 'size-20 shrink-0 rounded-lg border border-border';
-    const soldOut = !item.is_available;
-
-    if (item.image === null) {
-        return (
-            <div
-                aria-hidden="true"
-                className={cn(
-                    frame,
-                    'flex items-center justify-center bg-pandan text-2xl font-bold text-dahon',
-                    soldOut && 'opacity-60',
-                )}
-            >
-                {item.name.charAt(0)}
-            </div>
-        );
-    }
-
-    return (
-        <img
-            src={item.image.sm}
-            srcSet={`${item.image.sm} 400w, ${item.image.md} 800w`}
-            sizes="80px"
-            width={400}
-            height={400}
-            alt={item.name}
-            loading="lazy"
-            decoding="async"
-            className={cn(
-                frame,
-                'object-cover',
-                soldOut && 'opacity-60 grayscale',
-            )}
-        />
-    );
-}
-
 /**
- * One dish: its photo and sizes on the left, its name, price and the button on
- * the right. Both columns end at the same line, so the sizes and the button sit
- * side by side. The price waits until a size is chosen.
+ * The same portrait card the website shows, with the till's work added under
+ * it: pick a size, see what it costs, add it. The price waits for the size,
+ * because a dish with three sizes has no single price to show.
  */
 export function MenuCard({ item }: { item: MenuItem }) {
     const { add } = useCart();
@@ -69,6 +32,7 @@ export function MenuCard({ item }: { item: MenuItem }) {
     const timer = useRef<number | null>(null);
 
     const size = item.sizes.find((entry) => entry.id === sizeId) ?? null;
+    const soldOut = !item.is_available;
 
     useEffect(
         () => () => {
@@ -98,104 +62,105 @@ export function MenuCard({ item }: { item: MenuItem }) {
     return (
         <li
             className={cn(
-                'flex h-full gap-3 rounded-xl border border-border bg-card p-2.5 transition-colors duration-300',
-                added && 'border-kalamansi bg-kalamansi/10',
+                'flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(23,17,15,0.04),0_8px_24px_-16px_rgba(23,17,15,0.35)] transition-colors duration-300',
+                added && 'border-kalamansi',
             )}
         >
-            <div className="flex shrink-0 flex-col gap-2">
-                <div
-                    className={cn(lifting && 'plate-lift')}
-                    onAnimationEnd={() => setLifting(false)}
-                >
-                    <DishPhoto item={item} />
-                </div>
-
-                {item.is_available && item.sizes.length > 1 && (
-                    <div
-                        role="group"
-                        aria-label={`Size for ${item.name}`}
-                        className="mt-auto flex flex-wrap gap-1"
-                    >
-                        {item.sizes.map((entry) => (
-                            <button
-                                key={entry.id}
-                                type="button"
-                                aria-pressed={entry.id === sizeId}
-                                aria-label={entry.name}
-                                title={entry.name}
-                                onClick={() => setSizeId(entry.id)}
-                                className={cn(
-                                    'inline-flex size-9 items-center justify-center rounded-lg border text-xs font-semibold',
-                                    entry.id === sizeId
-                                        ? 'border-dahon bg-dahon text-pandan'
-                                        : 'border-border hover:bg-muted',
-                                )}
-                            >
-                                {sizeInitial(entry.name)}
-                            </button>
-                        ))}
-                    </div>
-                )}
+            <div
+                className={cn(lifting && 'plate-lift')}
+                onAnimationEnd={() => setLifting(false)}
+            >
+                <DishPhoto item={item} />
             </div>
 
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <h3 className="line-clamp-2 text-sm leading-snug font-semibold text-balance">
+            <div
+                className={cn(
+                    'flex flex-1 flex-col gap-1 p-2.5 transition-colors duration-300',
+                    added && 'bg-kalamansi/10',
+                )}
+            >
+                <h3 className="font-display text-sm leading-snug font-bold text-balance">
                     {item.name}
                 </h3>
 
                 {item.description && (
-                    <p className="line-clamp-2 text-xs text-muted-foreground">
+                    <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
                         {item.description}
                     </p>
                 )}
 
-                {item.is_available ? (
-                    <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1">
-                        <p
-                            className={cn(
-                                'text-sm font-semibold',
-                                size === null &&
-                                    'text-xs font-normal text-muted-foreground',
-                            )}
-                        >
-                            {size === null
-                                ? 'Pick a size'
-                                : formatPeso(size.price)}
-                        </p>
+                {!soldOut && (
+                    <div className="mt-auto flex flex-col gap-1.5 pt-1.5">
+                        {item.sizes.length > 1 && (
+                            <div
+                                role="group"
+                                aria-label={`Size for ${item.name}`}
+                                className="flex gap-1"
+                            >
+                                {item.sizes.map((entry) => (
+                                    <button
+                                        key={entry.id}
+                                        type="button"
+                                        aria-pressed={entry.id === sizeId}
+                                        aria-label={entry.name}
+                                        title={entry.name}
+                                        onClick={() => setSizeId(entry.id)}
+                                        className={cn(
+                                            'inline-flex size-8 shrink-0 items-center justify-center rounded-full border text-xs font-semibold',
+                                            entry.id === sizeId
+                                                ? 'border-dahon bg-dahon text-pandan'
+                                                : 'border-border hover:bg-muted',
+                                        )}
+                                    >
+                                        {sizeInitial(entry.name)}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
 
-                        <Button
-                            type="button"
-                            size="sm"
-                            className={cn(
-                                'h-9 rounded-lg px-4 transition-colors duration-300',
-                                added &&
-                                    'bg-kalamansi text-uling hover:bg-kalamansi',
-                            )}
-                            disabled={size === null}
-                            aria-label={
-                                size === null
-                                    ? `Pick a size for ${item.name}`
-                                    : `Add ${item.name}${item.sizes.length > 1 ? `, ${size.name},` : ''} for ${formatPeso(size.price)}`
-                            }
-                            onClick={handleAdd}
-                        >
-                            {added ? (
-                                <>
-                                    <Check aria-hidden="true" />
-                                    Added
-                                </>
-                            ) : (
-                                <>
-                                    <Plus aria-hidden="true" />
-                                    Add
-                                </>
-                            )}
-                        </Button>
+                        <div className="flex items-center justify-between gap-2">
+                            <p
+                                className={cn(
+                                    'font-display text-base font-bold',
+                                    size === null &&
+                                        'text-xs font-normal text-muted-foreground',
+                                )}
+                            >
+                                {size === null
+                                    ? 'Pick a size'
+                                    : formatPeso(size.price)}
+                            </p>
+
+                            <Button
+                                type="button"
+                                size="sm"
+                                className={cn(
+                                    'min-h-9 shrink-0 rounded-full px-3 text-xs transition-colors duration-300',
+                                    added &&
+                                        'bg-kalamansi text-uling hover:bg-kalamansi',
+                                )}
+                                disabled={size === null}
+                                aria-label={
+                                    size === null
+                                        ? `Pick a size for ${item.name}`
+                                        : `Add ${item.name}${item.sizes.length > 1 ? `, ${size.name},` : ''} for ${formatPeso(size.price)}`
+                                }
+                                onClick={handleAdd}
+                            >
+                                {added ? (
+                                    <>
+                                        <Check aria-hidden="true" />
+                                        Added
+                                    </>
+                                ) : (
+                                    <>
+                                        <Plus aria-hidden="true" />
+                                        Add
+                                    </>
+                                )}
+                            </Button>
+                        </div>
                     </div>
-                ) : (
-                    <p className="mt-auto pt-1 text-sm font-semibold text-achuete">
-                        Sold out today
-                    </p>
                 )}
             </div>
         </li>

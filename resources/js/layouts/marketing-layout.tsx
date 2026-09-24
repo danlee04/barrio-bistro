@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, ScrollRestoration } from 'react-router';
 import { RecentOrderLink } from '@/components/cart/recent-order-link';
 import { OpenStatus } from '@/components/public/open-status';
@@ -28,6 +28,32 @@ const GLASS_AT = 8;
 /** The website a visitor reads. The cart lives in the till, not here. */
 export default function MarketingLayout() {
     const [stuck, setStuck] = useState(false);
+    const header = useRef<HTMLElement>(null);
+
+    // The bar floats over the page, so anything else that sticks needs to know
+    // how tall it is. It wraps to two rows on a narrow screen, so it is
+    // measured rather than guessed.
+    useEffect(() => {
+        const bar = header.current;
+
+        if (bar === null) {
+            return;
+        }
+
+        function measure() {
+            document.documentElement.style.setProperty(
+                '--header-h',
+                `${bar.offsetHeight}px`,
+            );
+        }
+
+        measure();
+
+        const observer = new ResizeObserver(measure);
+        observer.observe(bar);
+
+        return () => observer.disconnect();
+    }, []);
 
     // At rest the bar is the hero's own green; it frosts once the page slides
     // under it, so there is something worth seeing through.
@@ -52,6 +78,7 @@ export default function MarketingLayout() {
             </a>
 
             <header
+                ref={header}
                 data-stuck={stuck}
                 className="nav-glass sticky top-0 z-40 text-pandan"
             >

@@ -93,7 +93,7 @@ export default function Offers() {
 
                 <div
                     id="bulk"
-                    className="max-w-184 scroll-mt-6 border-t border-border pt-12"
+                    className="max-w-184 scroll-mt-[calc(var(--header-h)+1.5rem)] border-t border-border pt-12"
                 >
                     <InquiryForm
                         type="bulk"

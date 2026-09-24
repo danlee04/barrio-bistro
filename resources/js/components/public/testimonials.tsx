@@ -88,7 +88,7 @@ export function Testimonials() {
         <section
             id="testimonials"
             aria-labelledby="testimonials-heading"
-            className="scroll-mt-4 border-t border-border bg-dahon text-pandan"
+            className="scroll-mt-[var(--header-h)] border-t border-border bg-dahon text-pandan"
         >
             <div
                 className="wrapper flex flex-col items-center gap-8 py-16 md:py-24"

@@ -1,5 +1,5 @@
 import { Link, useRouteLoaderData, useSearchParams } from 'react-router';
-import { MenuListing } from '@/components/public/menu-listing';
+import { DishCard } from '@/components/public/dish-card';
 import { Button } from '@/components/ui/button';
 import { restaurant } from '@/content/restaurant';
 import type { publicMenuLoader } from '@/lib/public-menu';
@@ -38,13 +38,19 @@ export default function Menu() {
             <title>{`Menu | ${restaurant.name}`}</title>
             <meta
                 name="description"
-                content="The full Barrio Bistro menu with prices, updated as dishes sell out."
+                content="Everything Barrio Bistro cooks, dish by dish, updated as things sell out."
             />
 
             <div className="wrapper flex flex-wrap items-end justify-between gap-4 pt-10 md:pt-14">
-                <h1 className="font-display text-[clamp(2.5rem,1.9rem+3vw,4.5rem)] leading-none font-bold tracking-tight">
-                    Menu
-                </h1>
+                <div className="flex flex-col gap-2">
+                    <h1 className="font-display text-[clamp(2.5rem,1.9rem+3vw,4.5rem)] leading-none font-bold tracking-tight">
+                        Menu
+                    </h1>
+                    <p className="max-w-[48ch] text-lg text-muted-foreground">
+                        Everything the kitchen cooks. Prices are on the order
+                        screen, where you can act on them.
+                    </p>
+                </div>
 
                 <Button
                     asChild
@@ -63,7 +69,7 @@ export default function Menu() {
                 <>
                     <nav
                         aria-label="Categories"
-                        className="sticky top-0 z-10 mt-6 border-b border-border bg-pandan/95 backdrop-blur"
+                        className="sticky top-[var(--header-h)] z-10 mt-6 border-b border-border bg-pandan/95 backdrop-blur"
                     >
                         <ul className="wrapper flex gap-2 overflow-x-auto overscroll-x-contain py-3">
                             <li className="shrink-0">
@@ -110,12 +116,18 @@ export default function Menu() {
                                 className="flex flex-col gap-2"
                             >
                                 <div className="flex flex-col gap-1">
-                                    <h2
-                                        id={`${category.slug}-heading`}
-                                        className="font-display text-3xl font-bold tracking-tight md:text-4xl"
-                                    >
-                                        {category.name}
-                                    </h2>
+                                    <div className="flex items-center gap-4">
+                                        <h2
+                                            id={`${category.slug}-heading`}
+                                            className="font-display text-3xl font-bold tracking-tight md:text-4xl"
+                                        >
+                                            {category.name}
+                                        </h2>
+                                        <span
+                                            aria-hidden="true"
+                                            className="h-px flex-1 bg-kawayan/50"
+                                        />
+                                    </div>
                                     {category.description && (
                                         <p className="max-w-[65ch] text-muted-foreground">
                                             {category.description}
@@ -123,12 +135,9 @@ export default function Menu() {
                                     )}
                                 </div>
 
-                                <ul className="flex flex-col divide-y divide-border">
+                                <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                                     {category.items.map((item) => (
-                                        <MenuListing
-                                            key={item.id}
-                                            item={item}
-                                        />
+                                        <DishCard key={item.id} item={item} />
                                     ))}
                                 </ul>
                             </section>

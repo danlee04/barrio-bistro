@@ -36,7 +36,7 @@ export default function Menu() {
             <title>{`Menu | ${restaurant.name}`}</title>
             <meta
                 name="description"
-                content="The full Barrio Bistro menu with prices, updated as dishes sell out."
+                content="Pick what you want and add it to your order."
             />
 
             <div className="wrapper pt-10 md:pt-14">
@@ -100,12 +100,18 @@ export default function Menu() {
                                 className="flex flex-col gap-5"
                             >
                                 <div className="flex flex-col gap-1">
-                                    <h2
-                                        id={`${category.slug}-heading`}
-                                        className="font-display text-3xl font-bold tracking-tight md:text-4xl"
-                                    >
-                                        {category.name}
-                                    </h2>
+                                    <div className="flex items-center gap-4">
+                                        <h2
+                                            id={`${category.slug}-heading`}
+                                            className="font-display text-3xl font-bold tracking-tight md:text-4xl"
+                                        >
+                                            {category.name}
+                                        </h2>
+                                        <span
+                                            aria-hidden="true"
+                                            className="h-px flex-1 bg-kawayan/50"
+                                        />
+                                    </div>
                                     {category.description && (
                                         <p className="max-w-[65ch] text-muted-foreground">
                                             {category.description}
@@ -113,7 +119,7 @@ export default function Menu() {
                                     )}
                                 </div>
 
-                                <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                                     {category.items.map((item) => (
                                         <MenuCard key={item.id} item={item} />
                                     ))}

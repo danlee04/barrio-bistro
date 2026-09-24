@@ -95,6 +95,10 @@
     --input: #d3d9c8;
     --ring: var(--achuete);
     --radius: 0.75rem;
+
+    /* The navigation bar's measured height; the layout keeps it current so
+       anything else that sticks can sit just below it. */
+    --header-h: 4rem;
 }
 
 @theme inline {

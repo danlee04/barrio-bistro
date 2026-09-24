@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 
 const links = [
     { to: '/menu', label: 'Menu' },
+    { to: '/gallery', label: 'Gallery' },
     { to: '/about', label: 'About' },
     { to: '/contact', label: 'Contact' },
 ];
@@ -122,6 +123,12 @@ export default function MarketingLayout() {
                             className="underline underline-offset-4"
                         >
                             Menu
+                        </Link>
+                        <Link
+                            to="/gallery"
+                            className="underline underline-offset-4"
+                        >
+                            Gallery
                         </Link>
                         <Link
                             to="/about"

@@ -7,14 +7,14 @@ use App\Http\Requests\Admin\UpdateMenuItemPhotoRequest;
 use App\Http\Resources\MenuItemResource;
 use App\Models\AuditLog;
 use App\Models\MenuItem;
-use App\Services\MenuPhotoProcessor;
+use App\Services\PhotoProcessor;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
 use Throwable;
 
 class MenuItemPhotoController extends Controller
 {
-    public function __construct(private readonly MenuPhotoProcessor $photos) {}
+    public function __construct(private readonly PhotoProcessor $photos) {}
 
     /**
      * Replace an item's photo with freshly processed renditions.

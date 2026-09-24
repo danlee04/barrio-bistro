@@ -1,5 +1,6 @@
 import {
     CookingPot,
+    Images,
     KeyRound,
     LayoutDashboard,
     LogOut,
@@ -50,6 +51,13 @@ export default function AdminLayout() {
             icon: UtensilsCrossed,
             end: false,
             visible: abilities.update_availability,
+        },
+        {
+            to: '/admin/gallery',
+            label: 'Gallery',
+            icon: Images,
+            end: false,
+            visible: abilities.manage_staff,
         },
         {
             to: '/admin/staff',

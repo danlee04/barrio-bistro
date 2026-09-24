@@ -1,4 +1,4 @@
-/** Edge, in pixels, of the square every menu photo is cut to before upload. */
+/** Edge, in pixels, of the square every uploaded photo is cut to. */
 export const PHOTO_EDGE = 800;
 
 /** Originals above this size are refused before the browser tries to decode them. */
@@ -27,7 +27,7 @@ export function squareCrop(width: number, height: number): SquareCrop {
  * upright according to the camera, so uploads are small and never fail on
  * size or dimensions. The server still validates and re-encodes the result.
  */
-export async function prepareMenuPhoto(original: File): Promise<PreparedPhoto> {
+export async function preparePhoto(original: File): Promise<PreparedPhoto> {
     const bitmap = await createImageBitmap(original, {
         imageOrientation: 'from-image',
     });
@@ -61,7 +61,7 @@ export async function prepareMenuPhoto(original: File): Promise<PreparedPhoto> {
         const extension = blob.type === 'image/webp' ? 'webp' : 'png';
 
         return {
-            file: new File([blob], `menu-photo.${extension}`, {
+            file: new File([blob], `photo.${extension}`, {
                 type: blob.type,
             }),
             wasUpscaled: crop.size < PHOTO_EDGE,

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\MarkOrderPaidController;
 use App\Http\Controllers\Admin\MenuItemController;
 use App\Http\Controllers\Admin\MenuItemPhotoController;
@@ -16,11 +17,13 @@ use App\Http\Controllers\MenuItemAvailabilityController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderPaymentController;
 use App\Http\Controllers\PayMongoWebhookController;
+use App\Http\Controllers\PublicGalleryController;
 use App\Http\Controllers\PublicMenuController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/menu', PublicMenuController::class)->name('menu.show');
 Route::get('/checkout/options', CheckoutOptionsController::class)->name('checkout.options');
+Route::get('/gallery', PublicGalleryController::class)->name('gallery.index');
 
 Route::post('/orders', [OrderController::class, 'store'])
     ->middleware('throttle:orders')
@@ -59,6 +62,12 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
             Route::put('/staff/{user}/password', StaffPasswordController::class)->name('staff.password.update');
 
             Route::get('/reports/summary', ReportsController::class)->name('reports.summary');
+
+            Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery.index');
+            Route::post('/gallery', [GalleryController::class, 'store'])->name('gallery.store');
+            Route::patch('/gallery/{galleryPhoto}', [GalleryController::class, 'update'])->name('gallery.update');
+            Route::delete('/gallery/{galleryPhoto}', [GalleryController::class, 'destroy'])->name('gallery.destroy');
+            Route::post('/gallery/{galleryPhoto}/move', [GalleryController::class, 'move'])->name('gallery.move');
 
             Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
             Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');

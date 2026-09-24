@@ -10,7 +10,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { HttpError } from '@/lib/http';
 import { removeMenuItemPhoto, uploadMenuItemPhoto } from '@/lib/menu';
-import { MAX_ORIGINAL_BYTES, prepareMenuPhoto } from '@/lib/photo';
+import { MAX_ORIGINAL_BYTES, preparePhoto } from '@/lib/photo';
 import type { MenuItem } from '@/types';
 
 type PhotoFieldProps = {
@@ -58,7 +58,7 @@ export function PhotoField({ item, onChanged }: PhotoFieldProps) {
         setIsPreparing(true);
 
         try {
-            const prepared = await prepareMenuPhoto(selected);
+            const prepared = await preparePhoto(selected);
 
             setFile(prepared.file);
             setPreviewUrl(URL.createObjectURL(prepared.file));

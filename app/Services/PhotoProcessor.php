@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
-class MenuPhotoProcessor
+class PhotoProcessor
 {
     /**
      * Edges (in pixels) of the square renditions to generate; each is saved as "{base}-{edge}.webp".
@@ -19,15 +19,16 @@ class MenuPhotoProcessor
     private const EDGES = [400, 800];
 
     /**
-     * Re-encode an uploaded photo into square WebP renditions and return their base path.
+     * Re-encode an uploaded photo into square WebP renditions and return their
+     * base path, under the given folder on the public disk.
      *
      * Decoding to pixels and encoding again throws away everything that is not the
      * picture itself: EXIF (including GPS), comments and any smuggled script.
      */
-    public function store(UploadedFile $photo): string
+    public function store(UploadedFile $photo, string $folder = 'menu-items'): string
     {
         $square = $this->cropToSquare($this->decode($photo));
-        $basePath = sprintf('menu-items/%s/%s', now()->format('Y/m'), Str::lower((string) Str::ulid()));
+        $basePath = sprintf('%s/%s/%s', $folder, now()->format('Y/m'), Str::lower((string) Str::ulid()));
 
         foreach (self::EDGES as $edge) {
             Storage::disk('public')->put("{$basePath}-{$edge}.webp", $this->encodeWebp($square, $edge));

@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router';
 import MarketingLayout from '@/layouts/marketing-layout';
 import OrderLayout from '@/layouts/order-layout';
 import { authLoader, guestLoader, staffLoader } from '@/lib/auth';
+import { adminGalleryLoader, galleryLoader } from '@/lib/gallery';
 import {
     archivedItemsLoader,
     categoriesLoader,
@@ -17,6 +18,7 @@ import { publicMenuLoader } from '@/lib/public-menu';
 import { staffPageLoader } from '@/lib/staff';
 import About from '@/pages/about';
 import Contact from '@/pages/contact';
+import Gallery from '@/pages/gallery';
 import Home from '@/pages/home';
 import Kiosk from '@/pages/kiosk';
 import Menu from '@/pages/menu';
@@ -43,6 +45,11 @@ export const router = createBrowserRouter([
         children: [
             { path: '/', element: <Home /> },
             { path: '/menu', element: <Menu /> },
+            {
+                path: '/gallery',
+                element: <Gallery />,
+                loader: galleryLoader,
+            },
             { path: '/about', element: <About /> },
             { path: '/contact', element: <Contact /> },
             { path: '*', element: <NotFound /> },
@@ -140,6 +147,12 @@ export const router = createBrowserRouter([
                 path: 'menu/archived',
                 loader: archivedItemsLoader,
                 lazy: page(() => import('@/pages/admin/menu/archived')),
+                errorElement: <RouteError />,
+            },
+            {
+                path: 'gallery',
+                loader: adminGalleryLoader,
+                lazy: page(() => import('@/pages/admin/gallery')),
                 errorElement: <RouteError />,
             },
             {

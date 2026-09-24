@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\GalleryController;
+use App\Http\Controllers\Admin\InquiryController as AdminInquiryController;
 use App\Http\Controllers\Admin\MarkOrderPaidController;
 use App\Http\Controllers\Admin\MenuItemController;
 use App\Http\Controllers\Admin\MenuItemPhotoController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Admin\StaffPasswordController;
 use App\Http\Controllers\CheckoutOptionsController;
 use App\Http\Controllers\CurrentUserController;
 use App\Http\Controllers\CurrentUserPasswordController;
+use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\MenuItemAvailabilityController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderPaymentController;
@@ -24,6 +26,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/menu', PublicMenuController::class)->name('menu.show');
 Route::get('/checkout/options', CheckoutOptionsController::class)->name('checkout.options');
 Route::get('/gallery', PublicGalleryController::class)->name('gallery.index');
+
+Route::post('/inquiries', [InquiryController::class, 'store'])
+    ->middleware('throttle:inquiries')
+    ->name('inquiries.store');
 
 Route::post('/orders', [OrderController::class, 'store'])
     ->middleware('throttle:orders')
@@ -68,6 +74,9 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
             Route::patch('/gallery/{galleryPhoto}', [GalleryController::class, 'update'])->name('gallery.update');
             Route::delete('/gallery/{galleryPhoto}', [GalleryController::class, 'destroy'])->name('gallery.destroy');
             Route::post('/gallery/{galleryPhoto}/move', [GalleryController::class, 'move'])->name('gallery.move');
+
+            Route::get('/inquiries', [AdminInquiryController::class, 'index'])->name('inquiries.index');
+            Route::patch('/inquiries/{inquiry}', [AdminInquiryController::class, 'update'])->name('inquiries.update');
 
             Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
             Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');

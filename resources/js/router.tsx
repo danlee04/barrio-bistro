@@ -4,6 +4,7 @@ import MarketingLayout from '@/layouts/marketing-layout';
 import OrderLayout from '@/layouts/order-layout';
 import { authLoader, guestLoader, staffLoader } from '@/lib/auth';
 import { adminGalleryLoader, galleryLoader } from '@/lib/gallery';
+import { inquiriesLoader } from '@/lib/inquiries';
 import {
     archivedItemsLoader,
     categoriesLoader,
@@ -23,6 +24,7 @@ import Home from '@/pages/home';
 import Kiosk from '@/pages/kiosk';
 import Menu from '@/pages/menu';
 import NotFound from '@/pages/not-found';
+import Offers from '@/pages/offers';
 import Checkout from '@/pages/order/checkout';
 import OrderMenu from '@/pages/order/menu';
 import OrderStatus from '@/pages/order/status';
@@ -50,6 +52,7 @@ export const router = createBrowserRouter([
                 element: <Gallery />,
                 loader: galleryLoader,
             },
+            { path: '/offers', element: <Offers /> },
             { path: '/about', element: <About /> },
             { path: '/contact', element: <Contact /> },
             { path: '*', element: <NotFound /> },
@@ -153,6 +156,12 @@ export const router = createBrowserRouter([
                 path: 'gallery',
                 loader: adminGalleryLoader,
                 lazy: page(() => import('@/pages/admin/gallery')),
+                errorElement: <RouteError />,
+            },
+            {
+                path: 'inquiries',
+                loader: inquiriesLoader,
+                lazy: page(() => import('@/pages/admin/inquiries')),
                 errorElement: <RouteError />,
             },
             {

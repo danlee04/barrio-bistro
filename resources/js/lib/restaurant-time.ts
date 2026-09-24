@@ -107,3 +107,13 @@ export function formatClock(time: string): string {
 
     return `${hour12}:${String(minutes).padStart(2, '0')} ${suffix}`;
 }
+
+/** Today's date in the shop's own zone, as `YYYY-MM-DD`. */
+export function zonedDate(date: Date, timeZone: string): string {
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).format(date);
+}

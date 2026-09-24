@@ -4,6 +4,7 @@ import {
     dayPart,
     formatClock,
     openStatus,
+    zonedDate,
     zonedParts,
 } from '@/lib/restaurant-time';
 
@@ -108,5 +109,15 @@ describe('formatClock', () => {
         ['00:15', '12:15 AM'],
     ])('shows %s as %s', (time, expected) => {
         expect(formatClock(time)).toBe(expected);
+    });
+});
+
+describe('zonedDate', () => {
+    it('gives the shop its own calendar day, not the device time zone', () => {
+        // 23:30 UTC is already the next morning in Manila.
+        const late = new Date('2026-09-24T23:30:00Z');
+
+        expect(zonedDate(late, 'Asia/Manila')).toBe('2026-09-25');
+        expect(zonedDate(late, 'UTC')).toBe('2026-09-24');
     });
 });

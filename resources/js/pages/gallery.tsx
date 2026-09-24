@@ -50,7 +50,7 @@ export default function Gallery() {
                     <p className="text-sm font-medium text-pandan/70">
                         Gallery
                     </p>
-                    <h1 className="max-w-[16ch] font-display text-[clamp(2.25rem,1.6rem+3vw,4rem)] leading-[1] font-bold tracking-tight">
+                    <h1 className="max-w-[16ch] font-display text-[clamp(2.25rem,1.6rem+3vw,4rem)] leading-none font-bold tracking-tight">
                         The shop, plate by plate.
                     </h1>
                 </div>

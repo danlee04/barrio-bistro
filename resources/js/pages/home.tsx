@@ -1,6 +1,5 @@
 import { ShoppingBag, UtensilsCrossed, Users } from 'lucide-react';
-import { useEffect } from 'react';
-import { Link, useLocation, useRouteLoaderData } from 'react-router';
+import { Link, useRouteLoaderData } from 'react-router';
 import { Hero } from '@/components/public/hero';
 import { OpenStatus } from '@/components/public/open-status';
 import { Photo } from '@/components/public/photo';
@@ -9,6 +8,7 @@ import { PriceList } from '@/components/public/price-list';
 import { Testimonials } from '@/components/public/testimonials';
 import { Button } from '@/components/ui/button';
 import { restaurant } from '@/content/restaurant';
+import { useHashScroll } from '@/lib/hash-scroll';
 import { featuredItems, type publicMenuLoader } from '@/lib/public-menu';
 import { dayPart } from '@/lib/restaurant-time';
 
@@ -23,16 +23,19 @@ const offers = [
         icon: UtensilsCrossed,
         title: 'Dine in',
         body: 'Order at the counter, take a number, and we bring it to your table.',
+        to: null,
     },
     {
         icon: ShoppingBag,
         title: 'Take out',
         body: 'Say the word at checkout and the kitchen packs it for the road.',
+        to: null,
     },
     {
         icon: Users,
         title: 'Bulk orders',
         body: 'Feeding a party or an office? Tell us the date and the headcount.',
+        to: '/offers#bulk',
     },
 ];
 
@@ -41,18 +44,8 @@ export default function Home() {
         useRouteLoaderData<typeof publicMenuLoader>('public') ?? [];
     const plates = featuredItems(categories);
     const phrase = heroPhrase[dayPart(new Date(), restaurant.timeZone)];
-    const { hash } = useLocation();
 
-    // A link like /#testimonials should land on the section, not the top.
-    useEffect(() => {
-        if (hash === '') {
-            return;
-        }
-
-        document
-            .getElementById(hash.slice(1))
-            ?.scrollIntoView({ block: 'start' });
-    }, [hash]);
+    useHashScroll();
 
     return (
         <>
@@ -89,6 +82,14 @@ export default function Home() {
                                 <p className="text-muted-foreground">
                                     {offer.body}
                                 </p>
+                                {offer.to !== null && (
+                                    <Link
+                                        to={offer.to}
+                                        className="mt-auto underline underline-offset-4"
+                                    >
+                                        Ask about a bulk order
+                                    </Link>
+                                )}
                             </li>
                         ))}
                     </ul>

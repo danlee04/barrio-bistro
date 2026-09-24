@@ -88,6 +88,14 @@ class AppServiceProvider extends ServiceProvider
             return $limits;
         });
 
+        // A public write with no account behind it, so it is held by address
+        // alone: a few in a minute for someone correcting a typo, and not many
+        // in an hour, because nobody writes to a restaurant ten times a day.
+        RateLimiter::for('inquiries', fn (Request $request): array => [
+            Limit::perMinute(3)->by('ip:'.$request->ip()),
+            Limit::perHour(10)->by('ip:'.$request->ip()),
+        ]);
+
         // Starting a payment costs us a provider call, so it is held tighter
         // than ordinary reads. Ten is generous for one guest and cheap for us.
         RateLimiter::for('payments', function (Request $request): array {

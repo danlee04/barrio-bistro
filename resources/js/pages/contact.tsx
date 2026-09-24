@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { InquiryForm } from '@/components/public/inquiry-form';
 import { OpenStatus } from '@/components/public/open-status';
 import { Button } from '@/components/ui/button';
 import { dayNames, restaurant } from '@/content/restaurant';
@@ -105,6 +106,16 @@ export default function Contact() {
                             })}
                         </dl>
                     </div>
+                </div>
+
+                <div className="max-w-184 border-t border-border pt-8">
+                    <InquiryForm
+                        type="contact"
+                        heading="Write to us"
+                        description="Questions about the food, the room, or anything else. We read these in the shop."
+                        messageLabel="Your message"
+                        messagePlaceholder="Is there parking at the back? We are five and one of us cannot take pork."
+                    />
                 </div>
 
                 <div className="flex flex-wrap gap-3 border-t border-border pt-8">

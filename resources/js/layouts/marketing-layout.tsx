@@ -11,6 +11,10 @@ const links = [
     { to: '/contact', label: 'Contact' },
 ];
 
+/** The same shape as a nav link, for the one that jumps to a section. */
+const linkClasses =
+    'inline-flex min-h-11 items-center rounded-full px-3 font-medium hover:bg-pandan/15';
+
 /** The website a visitor reads. The cart lives in the till, not here. */
 export default function MarketingLayout() {
     return (
@@ -52,7 +56,7 @@ export default function MarketingLayout() {
                                         to={link.to}
                                         className={({ isActive }) =>
                                             cn(
-                                                'inline-flex min-h-11 items-center rounded-full px-3 font-medium hover:bg-pandan/15',
+                                                linkClasses,
                                                 isActive && 'bg-pandan/15',
                                             )
                                         }
@@ -61,6 +65,15 @@ export default function MarketingLayout() {
                                     </NavLink>
                                 </li>
                             ))}
+
+                            <li className="shrink-0">
+                                <Link
+                                    to="/#testimonials"
+                                    className={linkClasses}
+                                >
+                                    Reviews
+                                </Link>
+                            </li>
                         </ul>
                     </nav>
                 </div>

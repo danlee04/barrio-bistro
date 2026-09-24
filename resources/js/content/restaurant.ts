@@ -9,13 +9,31 @@ export type OpeningHours = {
 
 export type Restaurant = {
     name: string;
+    tagline: string;
     timeZone: string;
     addressLines: string[];
     mapsUrl: string;
     phone: { display: string; tel: string };
     facebookUrl: string | null;
     story: string[];
+    /**
+     * Real words from real customers, with their permission. Replace every
+     * "(sample)" line before this site goes live: invented praise misleads the
+     * people it is written for.
+     */
+    testimonials: {
+        quote: string;
+        name: string;
+        note: string;
+        /**
+         * Optional file under `public/images/avatars`, with the customer's
+         * permission. Without one the card shows their initial.
+         */
+        avatar?: string;
+    }[];
     hours: OpeningHours[];
+    /** Files under `public/images`. See that folder's README. */
+    photos: { hero: string; story: string; interior: string };
 };
 
 /**
@@ -26,6 +44,7 @@ export type Restaurant = {
  */
 export const restaurant: Restaurant = {
     name: 'Barrio Bistro',
+    tagline: 'Filipino neighbourhood kitchen',
     timeZone: 'Asia/Manila',
     addressLines: [
         '123 Sample Street (sample)',
@@ -36,8 +55,26 @@ export const restaurant: Restaurant = {
     phone: { display: '0917 123 4567 (sample)', tel: '+639171234567' },
     facebookUrl: null,
     story: [
-        'Barrio Bistro cooks the dishes of a Filipino neighbourhood kitchen: slow adobo, crackling sisig, kare-kare on a Sunday. (sample)',
-        'Order from your table, pay at the counter or with GCash, and we bring it to you while it is still steaming. (sample)',
+        'Barrio Bistro started the way most neighbourhood kitchens do: one pot of adobo, cooked for a family, that the neighbours kept asking about. (sample)',
+        'We cook what a Filipino home cooks — adobo left to darken on a low flame, sisig that still crackles when it reaches the table, kare-kare thick with peanut on a Sunday. Nothing sits under a lamp waiting for you. (sample)',
+        'Order at the counter or from your phone, pay in cash or with GCash, and we will call your number when it is ready. (sample)',
+    ],
+    testimonials: [
+        {
+            quote: 'The adobo tastes like my lola made it, and it arrived while the rice was still steaming. (sample)',
+            name: 'Maria S. (sample)',
+            note: 'Dine in, Saturday lunch',
+        },
+        {
+            quote: 'We ordered two bilao of pancit for the office and they were ready exactly when they said. (sample)',
+            name: 'Jun P. (sample)',
+            note: 'Bulk order',
+        },
+        {
+            quote: 'Ordered from the tablet, paid with GCash, and my number was called in ten minutes. (sample)',
+            name: 'Grace T. (sample)',
+            note: 'Take out',
+        },
     ],
     hours: [
         { day: 0, opens: '08:00', closes: '21:00' },
@@ -48,6 +85,11 @@ export const restaurant: Restaurant = {
         { day: 5, opens: '10:00', closes: '22:00' },
         { day: 6, opens: '10:00', closes: '22:00' },
     ],
+    photos: {
+        hero: '/images/hero.jpg',
+        story: '/images/story.jpg',
+        interior: '/images/interior.jpg',
+    },
 };
 
 export const dayNames = [

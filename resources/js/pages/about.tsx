@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { Photo } from '@/components/public/photo';
 import { Button } from '@/components/ui/button';
 import { restaurant } from '@/content/restaurant';
 
@@ -22,33 +23,41 @@ export default function About() {
                 </div>
             </section>
 
-            <div className="wrapper flex flex-col gap-6 py-12 md:py-16">
-                {restaurant.story.map((paragraph) => (
-                    <p
-                        key={paragraph}
-                        className="max-w-[68ch] text-lg leading-relaxed"
-                    >
-                        {paragraph}
-                    </p>
-                ))}
+            <div className="wrapper grid items-start gap-8 py-12 md:grid-cols-[1fr_20rem] md:gap-12 md:py-16">
+                <div className="flex flex-col gap-6">
+                    {restaurant.story.map((paragraph) => (
+                        <p
+                            key={paragraph}
+                            className="max-w-[68ch] text-lg leading-relaxed"
+                        >
+                            {paragraph}
+                        </p>
+                    ))}
 
-                <div className="flex flex-wrap gap-3 pt-4">
-                    <Button
-                        asChild
-                        size="lg"
-                        className="min-h-12 rounded-full px-6 text-base"
-                    >
-                        <Link to="/menu">See the menu</Link>
-                    </Button>
-                    <Button
-                        asChild
-                        variant="outline"
-                        size="lg"
-                        className="min-h-12 rounded-full px-6 text-base"
-                    >
-                        <Link to="/contact">Visit us</Link>
-                    </Button>
+                    <div className="flex flex-wrap gap-3 pt-4">
+                        <Button
+                            asChild
+                            size="lg"
+                            className="min-h-12 rounded-full px-6 text-base"
+                        >
+                            <Link to="/menu">See the menu</Link>
+                        </Button>
+                        <Button
+                            asChild
+                            variant="outline"
+                            size="lg"
+                            className="min-h-12 rounded-full px-6 text-base"
+                        >
+                            <Link to="/contact">Visit us</Link>
+                        </Button>
+                    </div>
                 </div>
+
+                <Photo
+                    src={restaurant.photos.story}
+                    alt="The kitchen at work"
+                    className="aspect-4/3 w-full rounded-xl md:sticky md:top-6"
+                />
             </div>
         </>
     );

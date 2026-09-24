@@ -71,6 +71,7 @@
     --ube: #5b3a8c;
     --uling: #17110f;
     --kawayan: #cda869;
+    --papel: #f7f0da;
 
     /* Deeper kalamansi: the brand green fails contrast on a white card, while
        this step passes the dataviz validator's six checks. */
@@ -116,6 +117,7 @@
     --color-ube: var(--ube);
     --color-uling: var(--uling);
     --color-kawayan: var(--kawayan);
+    --color-papel: var(--papel);
     --color-chart-sales: var(--chart-sales);
 
     --color-background: var(--background);
@@ -150,6 +152,18 @@
 
     body {
         @apply bg-background text-foreground;
+    }
+
+    /*
+     * Tailwind v4 follows the browser and leaves buttons on the default
+     * arrow. Anything you can press should say so under the cursor, so the
+     * hand comes back here — except where there is nothing to press.
+     */
+    button:not(:disabled),
+    [role='button']:not(:disabled),
+    label[for],
+    summary {
+        cursor: pointer;
     }
 }
 
@@ -233,6 +247,84 @@
         }
     }
 
+    /* An order as a scrap of paper tacked to the kitchen wall. The corners
+       are uneven because nobody cut them, and it hangs from the tack, so it
+       swings when you reach for it. */
+    .ticket {
+        --tilt: 0deg;
+        position: relative;
+        background: var(--papel);
+        /* Four different corners: torn, not trimmed. */
+        border-radius: 2px 7px 3px 9px / 8px 2px 10px 3px;
+        rotate: var(--tilt);
+        transform-origin: 50% 0.85rem;
+        box-shadow:
+            0 1px 1px color-mix(in oklab, var(--uling) 14%, transparent),
+            0 12px 22px -14px color-mix(in oklab, var(--uling) 60%, transparent);
+        transition: box-shadow 200ms ease;
+    }
+
+    /* Been up on the wall too long; the paper says so as well as the clock. */
+    .ticket-late {
+        background: color-mix(in oklab, var(--achuete) 12%, var(--papel));
+    }
+
+    /* The grain of cheap paper, laid over everything on it. */
+    .ticket::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        pointer-events: none;
+        background-image:
+            repeating-linear-gradient(
+                92deg,
+                color-mix(in oklab, var(--uling) 4%, transparent) 0 1px,
+                transparent 1px 3px
+            ),
+            repeating-linear-gradient(
+                3deg,
+                color-mix(in oklab, var(--uling) 3%, transparent) 0 1px,
+                transparent 1px 4px
+            );
+    }
+
+    /* The tack. */
+    .ticket::before {
+        content: '';
+        position: absolute;
+        z-index: 1;
+        top: 0.45rem;
+        left: 50%;
+        width: 0.8rem;
+        height: 0.8rem;
+        translate: -50% 0;
+        border-radius: 9999px;
+        background: radial-gradient(
+            circle at 35% 30%,
+            color-mix(in oklab, white 65%, var(--achuete)),
+            var(--achuete) 62%
+        );
+        box-shadow:
+            0 1px 2px color-mix(in oklab, var(--uling) 50%, transparent),
+            inset 0 -1px 1px color-mix(in oklab, var(--uling) 25%, transparent);
+    }
+
+    /* Reaching for it lifts it off the wall. */
+    .ticket:hover {
+        z-index: 1;
+        box-shadow:
+            0 2px 2px color-mix(in oklab, var(--uling) 16%, transparent),
+            0 20px 30px -14px color-mix(in oklab, var(--uling) 65%, transparent);
+    }
+
+    /* And it swings on the tack, because that is the only thing holding it. */
+    @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+        .ticket:hover {
+            animation: ticket-swing 700ms cubic-bezier(0.25, 0.8, 0.3, 1);
+        }
+    }
+
     /* A plate on a bilao: the photo sits inside a woven bamboo rim. */
     .plate {
         position: relative;
@@ -283,6 +375,20 @@
             animation: serve 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
             animation-delay: calc(var(--serve-order, 0) * 90ms);
         }
+    }
+}
+
+@keyframes ticket-swing {
+    25% {
+        rotate: calc(var(--tilt) + 3deg);
+    }
+
+    55% {
+        rotate: calc(var(--tilt) - 2deg);
+    }
+
+    80% {
+        rotate: calc(var(--tilt) + 1deg);
     }
 }
 

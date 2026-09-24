@@ -96,9 +96,12 @@ export default function Orders() {
                         : 'Nothing finished yet today.'}
                 </p>
             ) : (
-                <ul className="grid gap-4 lg:grid-cols-2">
+                <ul className="gap-5 sm:columns-2 md:columns-3 xl:columns-4">
                     {orders.map((order) => (
-                        <li key={order.token} className="flex flex-col gap-1">
+                        <li
+                            key={order.token}
+                            className="mb-5 flex break-inside-avoid flex-col gap-1"
+                        >
                             <OrderCard order={order} now={now}>
                                 {canManage &&
                                     order.payment_status === 'unpaid' &&
@@ -145,12 +148,6 @@ export default function Orders() {
                                             Cancel
                                         </Button>
                                     )}
-
-                                {!canManage && (
-                                    <p className="text-sm text-muted-foreground">
-                                        {order.status_label}
-                                    </p>
-                                )}
                             </OrderCard>
 
                             {errors[order.token] && (

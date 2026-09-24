@@ -134,7 +134,7 @@ export default function Kitchen() {
                                     —
                                 </p>
                             ) : (
-                                <ul className="flex flex-col gap-3">
+                                <ul className="flex flex-col gap-5">
                                     {inColumn.map((order) => (
                                         <li
                                             key={order.token}
@@ -142,24 +142,24 @@ export default function Kitchen() {
                                         >
                                             <OrderCard order={order} now={now}>
                                                 {column.next !== null &&
-                                                canCook ? (
-                                                    <Button
-                                                        type="button"
-                                                        className="min-h-11"
-                                                        onClick={() =>
-                                                            void advance(
-                                                                order,
-                                                                column.next as OrderStatus,
-                                                            )
-                                                        }
-                                                    >
-                                                        {column.action}
-                                                    </Button>
-                                                ) : (
+                                                    canCook && (
+                                                        <Button
+                                                            type="button"
+                                                            className="min-h-11"
+                                                            onClick={() =>
+                                                                void advance(
+                                                                    order,
+                                                                    column.next as OrderStatus,
+                                                                )
+                                                            }
+                                                        >
+                                                            {column.action}
+                                                        </Button>
+                                                    )}
+
+                                                {column.next === null && (
                                                     <p className="text-sm text-muted-foreground">
-                                                        {column.next === null
-                                                            ? 'Waiting for the counter'
-                                                            : order.status_label}
+                                                        Waiting for the counter
                                                     </p>
                                                 )}
                                             </OrderCard>

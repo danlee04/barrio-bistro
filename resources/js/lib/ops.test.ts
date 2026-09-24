@@ -1,7 +1,20 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { elapsedLabel, newTokens } from '@/lib/ops';
+import { elapsedLabel, minutesWaiting, newTokens } from '@/lib/ops';
 
 const now = Date.parse('2026-09-23T12:00:00+08:00');
+
+describe('minutesWaiting', () => {
+    it('counts whole minutes only', () => {
+        expect(minutesWaiting('2026-09-23T11:56:30+08:00', now)).toBe(3);
+        expect(minutesWaiting('2026-09-23T11:50:00+08:00', now)).toBe(10);
+    });
+
+    it('treats a clock that runs ahead, or no time at all, as no wait', () => {
+        expect(minutesWaiting('2026-09-23T12:05:00+08:00', now)).toBe(0);
+        expect(minutesWaiting('not a date', now)).toBe(0);
+        expect(minutesWaiting(null, now)).toBe(0);
+    });
+});
 
 describe('elapsedLabel', () => {
     it('reads the wait the way a cashier says it', () => {

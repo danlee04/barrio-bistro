@@ -35,15 +35,29 @@ export async function markOrderPaid(token: string): Promise<StaffOrder> {
 export const queueLoader = () => listStaffOrders('queue');
 export const kitchenLoader = () => listStaffOrders('kitchen');
 
+/** Minutes after which an order has been on the wall too long. */
+export const HURRY_MINUTES = 10;
+
+/** Whole minutes an order has been waiting; never negative, never NaN. */
+export function minutesWaiting(iso: string | null, now = Date.now()): number {
+    if (iso === null) {
+        return 0;
+    }
+
+    const minutes = Math.floor((now - Date.parse(iso)) / 60_000);
+
+    return Number.isFinite(minutes) && minutes > 0 ? minutes : 0;
+}
+
 /** How long an order has been waiting, said the way the counter says it. */
 export function elapsedLabel(iso: string | null, now = Date.now()): string {
     if (iso === null) {
         return '';
     }
 
-    const minutes = Math.floor((now - Date.parse(iso)) / 60_000);
+    const minutes = minutesWaiting(iso, now);
 
-    if (!Number.isFinite(minutes) || minutes < 1) {
+    if (minutes < 1) {
         return 'just now';
     }
 

@@ -51,21 +51,25 @@ export default function Dashboard() {
 
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatTile
+                    tone="dahon"
                     label="Sales today"
                     value={formatPeso(today.sales)}
                     sub={`${today.paid_orders} paid ${today.paid_orders === 1 ? 'order' : 'orders'}`}
                 />
                 <StatTile
+                    tone="kalamansi"
                     label="Orders today"
                     value={String(today.orders)}
                     sub={`${today.paid_orders} paid · ${today.cancelled_orders} cancelled`}
                 />
                 <StatTile
+                    tone="ube"
                     label="Average per order"
                     value={formatPeso(today.average_order)}
                     sub="Paid orders only"
                 />
                 <StatTile
+                    tone="achuete"
                     label="Dishes sold this week"
                     value={String(dishesSold)}
                     sub="Top five dishes"

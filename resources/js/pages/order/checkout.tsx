@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { restaurant } from '@/content/restaurant';
 import { MAX_NOTE, priceCart } from '@/lib/cart';
 import { useCart } from '@/lib/cart-context';
+import { isKiosk } from '@/lib/kiosk';
 import { HttpError, type ValidationErrors } from '@/lib/http';
 import { formatPeso } from '@/lib/money';
 import { placeOrder, rememberOrder } from '@/lib/orders';
@@ -35,6 +36,7 @@ export default function Cart() {
     const navigate = useNavigate();
 
     const options = useLoaderData<typeof checkoutOptionsLoader>();
+    const [kiosk] = useState(() => isKiosk());
     const [type, setType] = useState<OrderType>('dine_in');
     const [method, setMethod] = useState<PaymentMethod>('counter');
     const [name, setName] = useState('');
@@ -55,8 +57,8 @@ export default function Cart() {
         try {
             const order = await placeOrder({
                 type,
-                table_number: type === 'dine_in' ? cart.table : null,
-                customer_name: type === 'takeout' ? name.trim() : null,
+                table_number: !kiosk && type === 'dine_in' ? cart.table : null,
+                customer_name: kiosk || type === 'takeout' ? name.trim() : null,
                 payment_method: onlineAvailable ? method : 'counter',
                 items: lines.map(({ line }) => ({
                     menu_item_id: line.itemId,
@@ -164,7 +166,7 @@ export default function Cart() {
                             ))}
                         </div>
 
-                        {type === 'dine_in' ? (
+                        {type === 'dine_in' && !kiosk ? (
                             <div className="grid gap-2">
                                 <Label htmlFor="table">Table number</Label>
                                 <Input
@@ -210,7 +212,9 @@ export default function Cart() {
                             </div>
                         ) : (
                             <div className="grid gap-2">
-                                <Label htmlFor="name">Name</Label>
+                                <Label htmlFor="name">
+                                    Name, so we can call you
+                                </Label>
                                 <Input
                                     id="name"
                                     value={name}

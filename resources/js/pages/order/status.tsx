@@ -2,15 +2,18 @@ import { useEffect, useRef, useState } from 'react';
 import {
     Link,
     useLoaderData,
+    useNavigate,
     useRevalidator,
     useSearchParams,
 } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { restaurant } from '@/content/restaurant';
 import { HttpError } from '@/lib/http';
+import { clearCart } from '@/lib/cart';
 import { formatPeso } from '@/lib/money';
 import { useOrderUpdates } from '@/lib/order-polling';
-import { type orderLoader, rememberOrder } from '@/lib/orders';
+import { forgetOrder, type orderLoader, rememberOrder } from '@/lib/orders';
+import { DONE_MS, isKiosk } from '@/lib/kiosk';
 import { createCheckoutSession, refreshPayment } from '@/lib/payments';
 import { cn } from '@/lib/utils';
 import type { OrderStatus as Status } from '@/types';
@@ -31,6 +34,8 @@ export default function OrderStatus() {
     const order = useOrderUpdates(initial);
     const current = steps.findIndex((step) => step.status === order.status);
 
+    const navigate = useNavigate();
+    const [kiosk] = useState(() => isKiosk());
     const [searchParams, setSearchParams] = useSearchParams();
     const revalidator = useRevalidator();
     const [paying, setPaying] = useState(false);
@@ -38,8 +43,31 @@ export default function OrderStatus() {
     const checked = useRef(false);
 
     useEffect(() => {
+        // The counter tablet belongs to the queue, not to one customer: it
+        // never keeps a shortcut back to somebody else's order.
+        if (kiosk) {
+            return;
+        }
+
         rememberOrder(order.token);
-    }, [order.token]);
+    }, [kiosk, order.token]);
+
+    function handOver() {
+        clearCart();
+        forgetOrder();
+        void navigate('/kiosk');
+    }
+
+    // The number stays up long enough to read, then the screen is free again.
+    useEffect(() => {
+        if (!kiosk) {
+            return;
+        }
+
+        const timer = window.setTimeout(handOver, DONE_MS);
+
+        return () => window.clearTimeout(timer);
+    }, [kiosk]);
 
     // Back from PayMongo: our server asks them how it went — the browser's own
     // word is never enough — and then the page reloads the order.
@@ -225,13 +253,23 @@ export default function OrderStatus() {
                 <p className="font-display text-2xl font-bold">
                     Total {formatPeso(order.total)}
                 </p>
-
-                <Link
-                    to="/menu"
-                    className="text-lg underline underline-offset-4"
-                >
-                    Back to the menu
-                </Link>
+                {kiosk ? (
+                    <Button
+                        type="button"
+                        size="lg"
+                        className="min-h-14 w-full rounded-full text-lg"
+                        onClick={handOver}
+                    >
+                        Done
+                    </Button>
+                ) : (
+                    <Link
+                        to="/menu"
+                        className="text-lg underline underline-offset-4"
+                    >
+                        Back to the menu
+                    </Link>
+                )}
             </div>
         </>
     );

@@ -18,6 +18,7 @@ import { staffPageLoader } from '@/lib/staff';
 import About from '@/pages/about';
 import Contact from '@/pages/contact';
 import Home from '@/pages/home';
+import Kiosk from '@/pages/kiosk';
 import Menu from '@/pages/menu';
 import NotFound from '@/pages/not-found';
 import Checkout from '@/pages/order/checkout';
@@ -46,6 +47,13 @@ export const router = createBrowserRouter([
             { path: '/contact', element: <Contact /> },
             { path: '*', element: <NotFound /> },
         ],
+    },
+    {
+        id: 'kiosk',
+        path: '/kiosk',
+        element: <Kiosk />,
+        loader: publicMenuLoader,
+        errorElement: <RouteError />,
     },
     {
         id: 'order',

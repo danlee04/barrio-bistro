@@ -59,14 +59,35 @@ test('prices sent by the browser are ignored', function () {
         ->assertJsonPath('data.items.0.unit_price', 18000);
 });
 
-test('dine-in needs a table the restaurant actually has', function () {
+test('dine-in refuses a table the restaurant does not have', function () {
     $size = MenuItemSize::factory()->create(['price' => 10000]);
-
-    $this->postJson('/api/v1/orders', orderPayload($size, ['table_number' => null]))
-        ->assertJsonValidationErrors(['table_number']);
 
     $this->postJson('/api/v1/orders', orderPayload($size, ['table_number' => 99]))
         ->assertJsonValidationErrors(['table_number']);
+
+    expect(Order::query()->count())->toBe(0);
+});
+
+test('a dine-in order at the counter carries a name instead of a table', function () {
+    $size = MenuItemSize::factory()->create(['price' => 10000]);
+
+    $this->postJson('/api/v1/orders', orderPayload($size, [
+        'table_number' => null,
+        'customer_name' => 'Ana',
+    ]))
+        ->assertCreated()
+        ->assertJsonPath('data.type', 'dine_in')
+        ->assertJsonPath('data.table_number', null)
+        ->assertJsonPath('data.customer_name', 'Ana');
+});
+
+test('a dine-in order with neither a table nor a name is refused', function () {
+    $size = MenuItemSize::factory()->create(['price' => 10000]);
+
+    $this->postJson('/api/v1/orders', orderPayload($size, [
+        'table_number' => null,
+        'customer_name' => null,
+    ]))->assertJsonValidationErrors(['table_number', 'customer_name']);
 
     expect(Order::query()->count())->toBe(0);
 });

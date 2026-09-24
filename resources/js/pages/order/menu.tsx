@@ -1,14 +1,12 @@
-import { Link, useRouteLoaderData, useSearchParams } from 'react-router';
-import { MenuListing } from '@/components/public/menu-listing';
-import { Button } from '@/components/ui/button';
+import { useRouteLoaderData, useSearchParams } from 'react-router';
+import { MenuCard } from '@/components/public/menu-card';
 import { restaurant } from '@/content/restaurant';
 import type { publicMenuLoader } from '@/lib/public-menu';
 import { cn } from '@/lib/utils';
 
-/** The menu to read. Ordering happens at the till, under /order. */
 export default function Menu() {
     const categories =
-        useRouteLoaderData<typeof publicMenuLoader>('public') ?? [];
+        useRouteLoaderData<typeof publicMenuLoader>('order') ?? [];
     const [searchParams, setSearchParams] = useSearchParams();
 
     const chosen = searchParams.get('c');
@@ -41,18 +39,10 @@ export default function Menu() {
                 content="The full Barrio Bistro menu with prices, updated as dishes sell out."
             />
 
-            <div className="wrapper flex flex-wrap items-end justify-between gap-4 pt-10 md:pt-14">
+            <div className="wrapper pt-10 md:pt-14">
                 <h1 className="font-display text-[clamp(2.5rem,1.9rem+3vw,4.5rem)] leading-none font-bold tracking-tight">
                     Menu
                 </h1>
-
-                <Button
-                    asChild
-                    size="lg"
-                    className="min-h-12 rounded-full px-6 text-base"
-                >
-                    <Link to="/order">Order now</Link>
-                </Button>
             </div>
 
             {categories.length === 0 ? (
@@ -102,12 +92,12 @@ export default function Menu() {
                         </ul>
                     </nav>
 
-                    <div className="wrapper flex flex-col gap-10 py-10 md:py-14">
+                    <div className="wrapper flex flex-col gap-12 py-10 md:py-14">
                         {shown.map((category) => (
                             <section
                                 key={category.id}
                                 aria-labelledby={`${category.slug}-heading`}
-                                className="flex flex-col gap-2"
+                                className="flex flex-col gap-5"
                             >
                                 <div className="flex flex-col gap-1">
                                     <h2
@@ -123,33 +113,13 @@ export default function Menu() {
                                     )}
                                 </div>
 
-                                <ul className="flex flex-col divide-y divide-border">
+                                <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                     {category.items.map((item) => (
-                                        <MenuListing
-                                            key={item.id}
-                                            item={item}
-                                        />
+                                        <MenuCard key={item.id} item={item} />
                                     ))}
                                 </ul>
                             </section>
                         ))}
-
-                        <div className="flex flex-col items-start gap-3 rounded-xl border border-border bg-card p-6">
-                            <p className="font-display text-xl font-bold">
-                                Hungry now?
-                            </p>
-                            <p className="text-muted-foreground">
-                                Order at the counter or from your phone — the
-                                kitchen starts once it is paid.
-                            </p>
-                            <Button
-                                asChild
-                                size="lg"
-                                className="min-h-12 rounded-full px-6 text-base"
-                            >
-                                <Link to="/order">Order now</Link>
-                            </Button>
-                        </div>
                     </div>
                 </>
             )}

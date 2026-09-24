@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 export function CartDock() {
     const { cart, setQuantity, setNote, remove } = useCart();
     const categories =
-        useRouteLoaderData<typeof publicMenuLoader>('public') ?? [];
+        useRouteLoaderData<typeof publicMenuLoader>('order') ?? [];
     const { pathname } = useLocation();
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
@@ -43,7 +43,7 @@ export function CartDock() {
         seen.current = count;
     }, [count]);
 
-    if (count === 0 || pathname === '/cart') {
+    if (count === 0 || pathname === '/order/checkout') {
         return null;
     }
 
@@ -187,7 +187,7 @@ export function CartDock() {
                             disabled={soldOut > 0}
                             onClick={() => {
                                 setOpen(false);
-                                void navigate('/cart');
+                                void navigate('/order/checkout');
                             }}
                         >
                             Checkout

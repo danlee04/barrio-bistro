@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 import { createBrowserRouter } from 'react-router';
-import PublicLayout from '@/layouts/public-layout';
+import MarketingLayout from '@/layouts/marketing-layout';
+import OrderLayout from '@/layouts/order-layout';
 import { authLoader, guestLoader, staffLoader } from '@/lib/auth';
 import {
     archivedItemsLoader,
@@ -14,11 +15,14 @@ import { checkoutOptionsLoader } from '@/lib/payments';
 import { reportsLoader } from '@/lib/reports';
 import { publicMenuLoader } from '@/lib/public-menu';
 import { staffPageLoader } from '@/lib/staff';
-import Cart from '@/pages/cart';
+import About from '@/pages/about';
+import Contact from '@/pages/contact';
 import Home from '@/pages/home';
 import Menu from '@/pages/menu';
 import NotFound from '@/pages/not-found';
-import OrderStatus from '@/pages/order-status';
+import Checkout from '@/pages/order/checkout';
+import OrderMenu from '@/pages/order/menu';
+import OrderStatus from '@/pages/order/status';
 import RouteError from '@/pages/route-error';
 
 /**
@@ -32,20 +36,36 @@ function page(load: () => Promise<{ default: ComponentType }>) {
 export const router = createBrowserRouter([
     {
         id: 'public',
-        element: <PublicLayout />,
+        element: <MarketingLayout />,
         errorElement: <RouteError />,
         loader: publicMenuLoader,
         children: [
             { path: '/', element: <Home /> },
             { path: '/menu', element: <Menu /> },
-            { path: '/cart', element: <Cart />, loader: checkoutOptionsLoader },
+            { path: '/about', element: <About /> },
+            { path: '/contact', element: <Contact /> },
+            { path: '*', element: <NotFound /> },
+        ],
+    },
+    {
+        id: 'order',
+        path: '/order',
+        element: <OrderLayout />,
+        errorElement: <RouteError />,
+        loader: publicMenuLoader,
+        children: [
+            { index: true, element: <OrderMenu /> },
             {
-                path: '/order/:token',
-                loader: orderLoader,
+                path: 'checkout',
+                element: <Checkout />,
+                loader: checkoutOptionsLoader,
+            },
+            {
+                path: ':token',
                 element: <OrderStatus />,
+                loader: orderLoader,
                 errorElement: <RouteError />,
             },
-            { path: '*', element: <NotFound /> },
         ],
     },
     {

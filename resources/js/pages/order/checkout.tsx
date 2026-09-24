@@ -30,7 +30,7 @@ const choice =
 
 export default function Cart() {
     const categories =
-        useRouteLoaderData<typeof publicMenuLoader>('public') ?? [];
+        useRouteLoaderData<typeof publicMenuLoader>('order') ?? [];
     const { cart, setQuantity, setNote, remove, setTable, clear } = useCart();
     const navigate = useNavigate();
 
@@ -115,7 +115,7 @@ export default function Cart() {
                     </h1>
                     <p className="text-lg">Pick something from today's menu.</p>
                     <Link
-                        to="/menu"
+                        to="/order"
                         className="text-lg underline underline-offset-4"
                     >
                         See the menu

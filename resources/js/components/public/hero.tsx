@@ -58,13 +58,23 @@ export function Hero({ plates, phrase }: HeroProps) {
                         {restaurant.story[0]}
                     </p>
 
-                    <Button
-                        asChild
-                        size="lg"
-                        className="mt-1 min-h-14 rounded-full px-8 text-base"
-                    >
-                        <Link to="/menu">See the full menu</Link>
-                    </Button>
+                    <div className="mt-1 flex flex-wrap gap-3">
+                        <Button
+                            asChild
+                            size="lg"
+                            className="min-h-14 rounded-full px-8 text-base"
+                        >
+                            <Link to="/order">Order now</Link>
+                        </Button>
+                        <Button
+                            asChild
+                            variant="secondary"
+                            size="lg"
+                            className="min-h-14 rounded-full px-8 text-base"
+                        >
+                            <Link to="/menu">See the menu</Link>
+                        </Button>
+                    </div>
                 </div>
 
                 {featured !== null ? (

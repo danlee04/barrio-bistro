@@ -18,6 +18,12 @@ const links = [
 const linkClasses =
     'relative inline-flex min-h-11 items-center rounded-full px-4 font-medium text-pandan/90 transition-colors hover:bg-pandan/15 hover:text-pandan';
 
+/**
+ * Footer links carry no underline, so the hover colour is the only thing left
+ * saying they can be pressed. Without it they would read as plain text.
+ */
+const footerLink = 'transition-colors hover:text-dahon';
+
 /** The link for the page you are already on: lit, like a pressed key. */
 const activeClasses =
     'bg-pandan text-dahon shadow-sm hover:bg-pandan hover:text-dahon';
@@ -145,10 +151,7 @@ export default function MarketingLayout() {
                             {restaurant.name}
                         </p>
                         <OpenStatus className="text-sm" />
-                        <Link
-                            to="/order"
-                            className="text-sm underline underline-offset-4"
-                        >
+                        <Link to="/order" className={cn('text-sm', footerLink)}>
                             Order now
                         </Link>
                     </div>
@@ -164,7 +167,7 @@ export default function MarketingLayout() {
                         </address>
                         <a
                             href={`tel:${restaurant.phone.tel}`}
-                            className="underline underline-offset-4"
+                            className={footerLink}
                         >
                             {restaurant.phone.display}
                         </a>
@@ -172,40 +175,22 @@ export default function MarketingLayout() {
 
                     <div className="flex flex-col gap-2 text-sm">
                         <p className="font-semibold">More</p>
-                        <Link
-                            to="/menu"
-                            className="underline underline-offset-4"
-                        >
+                        <Link to="/menu" className={footerLink}>
                             Menu
                         </Link>
-                        <Link
-                            to="/gallery"
-                            className="underline underline-offset-4"
-                        >
+                        <Link to="/gallery" className={footerLink}>
                             Gallery
                         </Link>
-                        <Link
-                            to="/offers"
-                            className="underline underline-offset-4"
-                        >
+                        <Link to="/offers" className={footerLink}>
                             Bulk orders
                         </Link>
-                        <Link
-                            to="/about"
-                            className="underline underline-offset-4"
-                        >
+                        <Link to="/about" className={footerLink}>
                             About
                         </Link>
-                        <Link
-                            to="/contact"
-                            className="underline underline-offset-4"
-                        >
+                        <Link to="/contact" className={footerLink}>
                             Contact
                         </Link>
-                        <Link
-                            to="/login"
-                            className="underline underline-offset-4"
-                        >
+                        <Link to="/login" className={footerLink}>
                             Staff login
                         </Link>
                     </div>

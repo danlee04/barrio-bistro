@@ -29,10 +29,10 @@ function Avatar({
             <img
                 src={avatar}
                 alt=""
-                width={56}
-                height={56}
+                width={96}
+                height={96}
                 loading="lazy"
-                className="size-14 shrink-0 rounded-full object-cover"
+                className="size-20 shrink-0 rounded-full object-cover ring-2 ring-pandan/25 md:size-24"
             />
         );
     }
@@ -41,7 +41,7 @@ function Avatar({
         <span
             aria-hidden="true"
             className={cn(
-                'flex size-14 shrink-0 items-center justify-center rounded-full font-display text-xl font-bold',
+                'flex size-20 shrink-0 items-center justify-center rounded-full font-display text-3xl font-bold ring-2 ring-pandan/25 md:size-24',
                 tone,
             )}
         >
@@ -110,10 +110,10 @@ export function Testimonials() {
                 >
                     <Quote
                         aria-hidden="true"
-                        className="size-8 text-pandan/40"
+                        className="size-7 text-pandan/40"
                     />
 
-                    <blockquote className="text-[clamp(1.25rem,1rem+1vw,1.75rem)] leading-snug text-balance">
+                    <blockquote className="text-[clamp(1.125rem,0.95rem+0.8vw,1.5rem)] leading-snug text-balance">
                         {entry.quote}
                     </blockquote>
 

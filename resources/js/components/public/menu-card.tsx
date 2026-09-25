@@ -62,7 +62,7 @@ export function MenuCard({ item }: { item: MenuItem }) {
     return (
         <li
             className={cn(
-                'flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(23,17,15,0.04),0_8px_24px_-16px_rgba(23,17,15,0.35)] transition-colors duration-300',
+                'group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(23,17,15,0.04),0_8px_24px_-16px_rgba(23,17,15,0.35)] transition-colors duration-300',
                 added && 'border-kalamansi',
             )}
         >

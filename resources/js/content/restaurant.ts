@@ -33,7 +33,15 @@ export type Restaurant = {
     }[];
     hours: OpeningHours[];
     /** Files under `public/images`. See that folder's README. */
-    photos: { hero: string; story: string; interior: string };
+    photos: {
+        hero: string;
+        story: string;
+        kitchen: string;
+        counter: string;
+        interior: string;
+        street: string;
+        table: string;
+    };
 };
 
 /**
@@ -55,9 +63,9 @@ export const restaurant: Restaurant = {
     phone: { display: '0917 123 4567 (sample)', tel: '+639171234567' },
     facebookUrl: null,
     story: [
-        'Barrio Bistro started the way most neighbourhood kitchens do: one pot of adobo, cooked for a family, that the neighbours kept asking about. (sample)',
-        'We cook what a Filipino home cooks — adobo left to darken on a low flame, sisig that still crackles when it reaches the table, kare-kare thick with peanut on a Sunday. Nothing sits under a lamp waiting for you. (sample)',
-        'Order at the counter or from your phone, pay in cash or with GCash, and we will call your number when it is ready. (sample)',
+        'There is a kind of Filipino cooking that never made it onto a menu: the pot left on a low flame all afternoon, the plate that arrives while the rice is still steaming, the second helping nobody asked for. That is what comes out of this kitchen.',
+        'Adobo left to darken until the sauce clings to the pork. Sisig that still crackles on its way to the table. Kare-kare thick with peanut, and a sinigang sour enough to make you sit up. Everything is cooked to order — nothing waits under a lamp for somebody to want it.',
+        'Order at the counter or from your own phone, and we will call your number when the plate is up. Feeding a party or an office? Tell us the day and the headcount, and we will cook for as many as you bring.',
     ],
     testimonials: [
         {
@@ -88,7 +96,11 @@ export const restaurant: Restaurant = {
     photos: {
         hero: '/images/hero.jpg',
         story: '/images/story.jpg',
+        kitchen: '/images/kitchen.jpg',
+        counter: '/images/counter.jpg',
         interior: '/images/interior.jpg',
+        street: '/images/street.jpg',
+        table: '/images/table.jpg',
     },
 };
 

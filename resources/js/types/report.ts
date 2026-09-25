@@ -9,6 +9,14 @@ export type TopItem = {
     name: string;
     quantity: number;
     sales: number;
+    /** Missing when the dish never had a photo, or the line lost its item. */
+    image: { sm: string; md: string } | null;
+};
+
+export type HourSlot = {
+    hour: number;
+    label: string;
+    orders: number;
 };
 
 export type ReportSummary = {
@@ -20,6 +28,13 @@ export type ReportSummary = {
         cancelled_orders: number;
         average_order: number;
     };
+    pace: {
+        /** Paid takings up to this same time of day yesterday. */
+        yesterday: number;
+        /** What yesterday finished at. */
+        yesterday_full: number;
+    };
     days: DaySales[];
+    hours: HourSlot[];
     top_items: TopItem[];
 };

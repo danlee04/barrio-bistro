@@ -3,10 +3,17 @@ import { InquiryForm } from '@/components/public/inquiry-form';
 import { OpenStatus } from '@/components/public/open-status';
 import { Button } from '@/components/ui/button';
 import { dayNames, restaurant } from '@/content/restaurant';
-import { formatClock } from '@/lib/restaurant-time';
+import { formatClock, groupHours } from '@/lib/restaurant-time';
 
 /** Monday first, the way people read opening hours. */
 const weekOrder = [1, 2, 3, 4, 5, 6, 0];
+
+/** "Monday", or "Monday to Thursday" when the run covers more than one day. */
+function runLabel(days: number[]): string {
+    const first = dayNames[days[0]];
+
+    return days.length === 1 ? first : `${first} to ${dayNames[days.at(-1)!]}`;
+}
 
 export default function Contact() {
     return (
@@ -86,24 +93,21 @@ export default function Contact() {
                             Opening hours
                         </h2>
                         <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-lg">
-                            {weekOrder.map((day) => {
-                                const hours = restaurant.hours.find(
-                                    (entry) => entry.day === day,
-                                );
-
-                                return (
-                                    <div key={day} className="contents">
+                            {groupHours(restaurant.hours, weekOrder).map(
+                                (run) => (
+                                    <div key={run.days[0]} className="contents">
                                         <dt className="font-medium">
-                                            {dayNames[day]}
+                                            {runLabel(run.days)}
                                         </dt>
                                         <dd>
-                                            {hours
-                                                ? `${formatClock(hours.opens)} to ${formatClock(hours.closes)}`
+                                            {run.opens !== null &&
+                                            run.closes !== null
+                                                ? `${formatClock(run.opens)} to ${formatClock(run.closes)}`
                                                 : 'Closed'}
                                         </dd>
                                     </div>
-                                );
-                            })}
+                                ),
+                            )}
                         </dl>
                     </div>
                 </div>

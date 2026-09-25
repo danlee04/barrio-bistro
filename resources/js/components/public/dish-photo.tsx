@@ -29,7 +29,7 @@ export function DishPhoto({ item }: { item: MenuItem }) {
                     loading="lazy"
                     decoding="async"
                     className={cn(
-                        'h-full w-full object-cover',
+                        'h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100',
                         soldOut && 'grayscale',
                     )}
                 />

@@ -2,10 +2,13 @@
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
+use App\Services\SalesReport;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Storage;
 
 function soldOrder(
     int $total,
@@ -125,4 +128,119 @@ test('staff are told whether the reports are theirs to open', function () {
     $this->actingAs(User::factory()->cashier()->create())
         ->getJson('/api/v1/me')
         ->assertJsonPath('abilities.view_reports', false);
+});
+
+test('yesterday is measured to the same minute, not the whole day', function () {
+    $manila = 'Asia/Manila';
+    $noon = Date::parse('2026-09-24 12:00:00', $manila);
+
+    Date::setTestNow($noon);
+
+    $yesterday = $noon->copy()->subDay()->toDateString();
+
+    // Two sales before noon yesterday, one after: only the first two count.
+    $morning = soldOrder(10_000, $yesterday);
+    $morning->created_at = $noon->copy()->subDay()->setTime(9, 0)->utc();
+    $morning->save();
+
+    $late = soldOrder(50_000, $yesterday);
+    $late->created_at = $noon->copy()->subDay()->setTime(19, 0)->utc();
+    $late->save();
+
+    $report = app(SalesReport::class)->summary();
+
+    expect($report['pace']['yesterday'])->toBe(10_000)
+        ->and($report['pace']['yesterday_full'])->toBe(60_000);
+
+    Date::setTestNow();
+});
+
+test('the busy hours keep the quiet ones in between', function () {
+    $manila = 'Asia/Manila';
+    $now = Date::parse('2026-09-24 20:00:00', $manila);
+
+    Date::setTestNow($now);
+
+    foreach ([11, 11, 13] as $hour) {
+        $order = soldOrder(10_000);
+        $order->created_at = $now->copy()->setTime($hour, 30)->utc();
+        $order->save();
+    }
+
+    $report = app(SalesReport::class)->summary();
+
+    expect($report['hours'])->toBe([
+        ['hour' => 11, 'label' => '11am', 'orders' => 2],
+        ['hour' => 12, 'label' => '12pm', 'orders' => 0],
+        ['hour' => 13, 'label' => '1pm', 'orders' => 1],
+    ]);
+
+    Date::setTestNow();
+});
+
+test('a day with nothing sold reports no hours at all', function () {
+    $report = app(SalesReport::class)->summary();
+
+    expect($report['hours'])->toBe([])
+        ->and($report['pace']['yesterday'])->toBe(0);
+});
+
+test('a top dish carries its photo, and survives having none', function () {
+    Storage::fake('public');
+
+    $withPhoto = MenuItem::factory()->create(['name' => 'Adobo']);
+    $withPhoto->image_path = 'menu-items/2026/09/abc';
+    $withPhoto->save();
+
+    $plain = MenuItem::factory()->create(['name' => 'Lumpia']);
+
+    $order = soldOrder(30_000);
+
+    OrderItem::factory()->for($order)->create([
+        'menu_item_id' => $withPhoto->id,
+        'item_name' => 'Adobo',
+        'size_name' => 'Regular',
+        'unit_price' => 10_000,
+        'quantity' => 2,
+        'line_total' => 20_000,
+    ]);
+
+    OrderItem::factory()->for($order)->create([
+        'menu_item_id' => $plain->id,
+        'item_name' => 'Lumpia',
+        'size_name' => 'Regular',
+        'unit_price' => 10_000,
+        'quantity' => 1,
+        'line_total' => 10_000,
+    ]);
+
+    $items = app(SalesReport::class)->summary()['top_items'];
+
+    expect($items[0]['name'])->toBe('Adobo')
+        ->and($items[0]['image'])->toBe($withPhoto->imageUrls())
+        ->and($items[1]['name'])->toBe('Lumpia')
+        ->and($items[1]['image'])->toBeNull();
+});
+
+test('a dish still shows its photo after it is archived', function () {
+    $item = MenuItem::factory()->create(['name' => 'Sinigang']);
+    $item->image_path = 'menu-items/2026/09/xyz';
+    $item->save();
+
+    $order = soldOrder(15_000);
+
+    OrderItem::factory()->for($order)->create([
+        'menu_item_id' => $item->id,
+        'item_name' => 'Sinigang',
+        'size_name' => 'Regular',
+        'unit_price' => 15_000,
+        'quantity' => 1,
+        'line_total' => 15_000,
+    ]);
+
+    $item->delete();
+
+    $items = app(SalesReport::class)->summary()['top_items'];
+
+    expect($items[0]['image'])->not->toBeNull();
 });

@@ -117,3 +117,40 @@ export function zonedDate(date: Date, timeZone: string): string {
         day: '2-digit',
     }).format(date);
 }
+
+export type HoursRun = {
+    /** The days in this run, in the order they are shown. */
+    days: number[];
+    /** Null on both when the shop is shut on these days. */
+    opens: string | null;
+    closes: string | null;
+};
+
+/**
+ * Fold consecutive days that keep the same hours into one run, so a week of
+ * identical rows reads as "Monday to Thursday" instead of four lines saying
+ * the same thing. Days missing from `hours` are closed, and closed days group
+ * together too.
+ */
+export function groupHours(hours: OpeningHours[], order: number[]): HoursRun[] {
+    const runs: HoursRun[] = [];
+
+    for (const day of order) {
+        const entry = hours.find((hour) => hour.day === day);
+        const opens = entry?.opens ?? null;
+        const closes = entry?.closes ?? null;
+        const last = runs.at(-1);
+
+        if (
+            last !== undefined &&
+            last.opens === opens &&
+            last.closes === closes
+        ) {
+            last.days.push(day);
+        } else {
+            runs.push({ days: [day], opens, closes });
+        }
+    }
+
+    return runs;
+}

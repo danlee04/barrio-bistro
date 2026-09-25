@@ -16,9 +16,22 @@ import {
     useLoaderData,
     useNavigate,
 } from 'react-router';
-import { Button } from '@/components/ui/button';
 import { logout, type staffLoader } from '@/lib/auth';
 import { cn } from '@/lib/utils';
+
+/** Two letters for the badge: "Dan Madelo" becomes DM, "Nena" stays N. */
+function initials(name: string): string {
+    return name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((word) => word.charAt(0).toUpperCase())
+        .join('');
+}
+
+/** The shape both footer actions take, so neither looks louder than the other. */
+const actionClasses =
+    'flex min-h-10 shrink-0 items-center justify-center gap-2.5 rounded-lg px-3 hover:bg-muted md:justify-start';
 
 export default function AdminLayout() {
     const { user, abilities } = useLoaderData<typeof staffLoader>();
@@ -111,28 +124,50 @@ export default function AdminLayout() {
                         </NavLink>
                     ))}
                 </nav>
-                <div className="flex flex-col gap-2 text-sm md:mt-auto">
-                    <div>
-                        <p className="font-medium">{user.name}</p>
-                        <p className="text-muted-foreground">
-                            {user.role_label}
-                        </p>
+                <div className="flex items-center gap-2 border-t border-border pt-4 text-sm md:mt-auto md:flex-col md:items-stretch md:gap-1">
+                    <div className="flex min-w-0 flex-1 items-center gap-3 rounded-lg bg-muted p-2.5 md:flex-none">
+                        <span
+                            aria-hidden="true"
+                            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-dahon font-display text-xs font-bold text-pandan"
+                        >
+                            {initials(user.name)}
+                        </span>
+                        <div className="flex min-w-0 flex-col">
+                            <p className="truncate font-semibold">
+                                {user.name}
+                            </p>
+                            <p className="truncate text-xs text-muted-foreground">
+                                {user.role_label}
+                            </p>
+                        </div>
                     </div>
+
                     <Link
                         to="/account/password"
-                        className="flex items-center gap-2 underline underline-offset-4"
+                        aria-label="Change password"
+                        className={actionClasses}
                     >
-                        <KeyRound aria-hidden="true" className="size-4" />
-                        Change password
+                        <KeyRound
+                            aria-hidden="true"
+                            className="size-4 shrink-0 text-muted-foreground"
+                        />
+                        <span className="hidden md:inline">
+                            Change password
+                        </span>
                     </Link>
-                    <Button
-                        variant="outline"
-                        size="sm"
+
+                    <button
+                        type="button"
+                        aria-label="Log out"
                         onClick={() => void handleLogout()}
+                        className={actionClasses}
                     >
-                        <LogOut aria-hidden="true" />
-                        Log out
-                    </Button>
+                        <LogOut
+                            aria-hidden="true"
+                            className="size-4 shrink-0 text-muted-foreground"
+                        />
+                        <span className="hidden md:inline">Log out</span>
+                    </button>
                 </div>
             </aside>
             <main className="flex-1 p-6">

@@ -56,7 +56,7 @@ export default function About() {
                 <Photo
                     src={restaurant.photos.story}
                     alt="The kitchen at work"
-                    className="aspect-4/3 w-full rounded-xl md:sticky md:top-6"
+                    className="aspect-4/5 w-full rounded-2xl shadow-xl ring-1 ring-uling/10 md:sticky md:top-[calc(var(--header-h)+1.5rem)]"
                 />
             </div>
         </>

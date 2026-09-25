@@ -3,6 +3,7 @@ import type { OpeningHours } from '@/content/restaurant';
 import {
     dayPart,
     formatClock,
+    groupHours,
     openStatus,
     zonedDate,
     zonedParts,
@@ -119,5 +120,63 @@ describe('zonedDate', () => {
 
         expect(zonedDate(late, 'Asia/Manila')).toBe('2026-09-25');
         expect(zonedDate(late, 'UTC')).toBe('2026-09-24');
+    });
+});
+
+describe('groupHours', () => {
+    const week = [1, 2, 3, 4, 5, 6, 0];
+
+    it('folds consecutive days that keep the same hours', () => {
+        const runs = groupHours(
+            [
+                { day: 0, opens: '08:00', closes: '21:00' },
+                { day: 1, opens: '10:00', closes: '21:00' },
+                { day: 2, opens: '10:00', closes: '21:00' },
+                { day: 3, opens: '10:00', closes: '21:00' },
+                { day: 4, opens: '10:00', closes: '21:00' },
+                { day: 5, opens: '10:00', closes: '22:00' },
+                { day: 6, opens: '10:00', closes: '22:00' },
+            ],
+            week,
+        );
+
+        expect(runs).toEqual([
+            { days: [1, 2, 3, 4], opens: '10:00', closes: '21:00' },
+            { days: [5, 6], opens: '10:00', closes: '22:00' },
+            { days: [0], opens: '08:00', closes: '21:00' },
+        ]);
+    });
+
+    it('groups the closed days together as well', () => {
+        const runs = groupHours(
+            [
+                { day: 4, opens: '10:00', closes: '21:00' },
+                { day: 5, opens: '10:00', closes: '21:00' },
+            ],
+            week,
+        );
+
+        expect(runs).toEqual([
+            { days: [1, 2, 3], opens: null, closes: null },
+            { days: [4, 5], opens: '10:00', closes: '21:00' },
+            { days: [6, 0], opens: null, closes: null },
+        ]);
+    });
+
+    it('does not join days that are apart in the week', () => {
+        const runs = groupHours(
+            [
+                { day: 1, opens: '10:00', closes: '21:00' },
+                { day: 6, opens: '10:00', closes: '21:00' },
+            ],
+            week,
+        );
+
+        expect(runs.map((run) => run.days)).toEqual([
+            [1],
+            [2, 3, 4, 5],
+            [6],
+            [0],
+        ]);
     });
 });

@@ -325,6 +325,23 @@
         }
     }
 
+    /* Reaching for a dish lifts its bilao, the way a plate tips towards you
+       when somebody sets it down. Pointer devices only: on the counter tablet
+       there is no hover, only a tap that would fire it by accident. */
+    @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+        .reach .plate {
+            transition:
+                transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                box-shadow 260ms ease;
+        }
+
+        .reach:hover .plate {
+            transform: translateY(-0.6rem) rotate(-4deg) scale(1.03);
+            box-shadow: 0 1.6rem 2rem -1rem
+                color-mix(in oklab, var(--uling) 65%, transparent);
+        }
+    }
+
     /* A plate on a bilao: the photo sits inside a woven bamboo rim. */
     .plate {
         position: relative;

@@ -8,7 +8,7 @@ import type { MenuItem } from '@/types';
  */
 export function DishCard({ item }: { item: MenuItem }) {
     return (
-        <li className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(23,17,15,0.04),0_8px_24px_-16px_rgba(23,17,15,0.35)]">
+        <li className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(23,17,15,0.04),0_8px_24px_-16px_rgba(23,17,15,0.35)]">
             <DishPhoto item={item} />
 
             <div className="flex flex-1 flex-col gap-1 p-2.5">

@@ -6,6 +6,7 @@ import type { staffLoader } from '@/lib/auth';
 import { chimeMuted, playChime, setChimeMuted } from '@/lib/chime';
 import { HttpError } from '@/lib/http';
 import { type kitchenLoader, newTokens, updateOrderStatus } from '@/lib/ops';
+import { useRecountOrders } from '@/lib/order-counts';
 import { useStaffOrders } from '@/lib/ops-polling';
 import type { OrderStatus, StaffOrder } from '@/types';
 
@@ -35,6 +36,7 @@ export default function Kitchen() {
     const [muted, setMuted] = useState(() => chimeMuted());
     const [errors, setErrors] = useState<Record<string, string>>({});
     const seen = useRef<string[] | null>(null);
+    const recount = useRecountOrders();
 
     useEffect(() => {
         const timer = window.setInterval(() => setNow(Date.now()), 30_000);
@@ -69,6 +71,7 @@ export default function Kitchen() {
                     entry.token === order.token ? updated : entry,
                 ),
             );
+            recount();
         } catch (failure) {
             setErrors((current) => ({
                 ...current,

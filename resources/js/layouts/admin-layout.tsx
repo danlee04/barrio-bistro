@@ -18,7 +18,7 @@ import {
     useNavigate,
 } from 'react-router';
 import { logout, type staffLoader } from '@/lib/auth';
-import { useOrderCounts } from '@/lib/order-counts';
+import { OrderCountsProvider, useOrderCounts } from '@/lib/order-counts';
 import { cn } from '@/lib/utils';
 
 /** Two letters for the badge: "Dan Madelo" becomes DM, "Nena" stays N. */
@@ -63,7 +63,7 @@ const actionClasses =
 export default function AdminLayout() {
     const { user, abilities } = useLoaderData<typeof staffLoader>();
     const navigate = useNavigate();
-    const counts = useOrderCounts(COUNTS_MS);
+    const { counts, recount } = useOrderCounts(COUNTS_MS);
 
     const links = [
         {
@@ -241,7 +241,11 @@ export default function AdminLayout() {
                 </div>
             </aside>
             <main className="flex-1 p-6">
-                <Outlet />
+                {/* Anything in here that moves an order can ask the badges to
+                    catch up, instead of waiting out the poll. */}
+                <OrderCountsProvider value={recount}>
+                    <Outlet />
+                </OrderCountsProvider>
             </main>
         </div>
     );

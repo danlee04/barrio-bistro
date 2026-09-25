@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import type { staffLoader } from '@/lib/auth';
 import { HttpError } from '@/lib/http';
 import { markOrderPaid, type queueLoader, updateOrderStatus } from '@/lib/ops';
+import { useRecountOrders } from '@/lib/order-counts';
 import { useStaffOrders } from '@/lib/ops-polling';
 import { cn } from '@/lib/utils';
 import type { OpsView, StaffOrder } from '@/types';
@@ -25,6 +26,7 @@ export default function Orders() {
     const [now, setNow] = useState(() => Date.now());
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [cancelling, setCancelling] = useState<StaffOrder | null>(null);
+    const recount = useRecountOrders();
 
     // The waiting times move on their own, without asking the server again.
     useEffect(() => {
@@ -49,6 +51,7 @@ export default function Orders() {
 
         try {
             replace(await action());
+            recount();
         } catch (failure) {
             setErrors((current) => ({
                 ...current,

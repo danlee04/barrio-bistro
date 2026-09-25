@@ -16,7 +16,7 @@ export default function OrderLayout() {
 
     return (
         <CartProvider>
-            <div className="flex min-h-svh flex-col bg-pandan text-uling">
+            <div className="flex h-svh flex-col overflow-hidden bg-pandan text-uling">
                 <a
                     href="#content"
                     className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-uling focus:px-4 focus:py-2 focus:text-pandan"
@@ -24,7 +24,7 @@ export default function OrderLayout() {
                     Skip to content
                 </a>
 
-                <header className="bg-dahon text-pandan">
+                <header className="shrink-0 bg-dahon text-pandan">
                     <div className="wrapper flex min-h-16 items-center justify-between gap-4 py-3">
                         {kiosk ? (
                             <p className="font-display text-xl font-bold tracking-tight">
@@ -43,12 +43,14 @@ export default function OrderLayout() {
                     </div>
                 </header>
 
-                <main id="content" className="flex-1">
+                {/* The till owns the viewport: the page inside it scrolls,
+                    not the window, so a screen that says it fits really does. */}
+                <main id="content" className="min-h-0 flex-1 overflow-y-auto">
                     <Outlet />
                     <CartDock />
                 </main>
 
-                <footer className="border-t border-border">
+                <footer className="shrink-0 border-t border-border">
                     <div className="wrapper flex flex-wrap items-center justify-between gap-4 py-5 text-sm text-muted-foreground">
                         <p>
                             Pay at the counter, or online with GCash or a card.

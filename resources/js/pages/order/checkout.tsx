@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils';
 import type { OrderType, PaymentMethod } from '@/types';
 
 const choice =
-    'flex min-h-20 flex-col justify-center rounded-xl border-2 px-4 text-left';
+    'flex min-h-16 flex-col justify-center rounded-xl border-2 px-4 text-left';
 
 export default function Cart() {
     const categories =
@@ -111,7 +111,7 @@ export default function Cart() {
             <>
                 <title>{`Your order | ${restaurant.name}`}</title>
 
-                <div className="wrapper flex flex-col items-start gap-4 py-20">
+                <div className="wrapper flex flex-col items-start gap-4 py-16">
                     <h1 className="font-display text-4xl font-bold tracking-tight">
                         Your order is empty.
                     </h1>
@@ -131,15 +131,21 @@ export default function Cart() {
         <>
             <title>{`Your order | ${restaurant.name}`}</title>
 
+            {/*
+                One screen from a tablet up: the form and the order sit side by
+                side inside the viewport, and a long order scrolls inside its
+                own list rather than pushing the total off the bottom. On a
+                phone there is no room for that, so it stacks and scrolls.
+            */}
             <form
                 onSubmit={handleSubmit}
-                className="wrapper grid gap-8 py-10 lg:grid-cols-[1fr_22rem] lg:items-start lg:gap-10"
+                className="wrapper flex h-full flex-col gap-4 py-4 md:grid md:grid-cols-[1fr_minmax(18rem,22rem)] md:grid-rows-[auto_minmax(0,1fr)] md:gap-x-8 md:gap-y-3 md:overflow-hidden md:py-5"
             >
-                <h1 className="font-display text-4xl font-bold tracking-tight lg:col-span-2">
+                <h1 className="font-display text-2xl font-bold tracking-tight md:col-span-2 md:text-3xl">
                     Your order
                 </h1>
 
-                <div className="flex flex-col gap-8">
+                <div className="flex flex-col gap-6 md:min-h-0 md:overflow-y-auto md:pr-1">
                     <fieldset className="flex flex-col gap-3">
                         <legend className="mb-2 font-display text-xl font-bold">
                             Where are you eating?
@@ -153,7 +159,7 @@ export default function Cart() {
                                     aria-pressed={type === option}
                                     onClick={() => setType(option)}
                                     className={cn(
-                                        'min-h-14 rounded-xl border-2 px-4 font-semibold',
+                                        'min-h-12 rounded-xl border-2 px-4 font-semibold',
                                         type === option
                                             ? 'border-dahon bg-dahon text-pandan'
                                             : 'border-border bg-card',
@@ -297,12 +303,12 @@ export default function Cart() {
                     </fieldset>
                 </div>
 
-                <aside className="flex flex-col gap-4 lg:sticky lg:top-6">
-                    <h2 className="font-display text-xl font-bold">
+                <aside className="flex flex-col gap-3 md:min-h-0">
+                    <h2 className="shrink-0 font-display text-lg font-bold">
                         {lines.length} {lines.length === 1 ? 'dish' : 'dishes'}
                     </h2>
 
-                    <ul className="flex flex-col divide-y divide-border rounded-xl border border-border bg-card px-4">
+                    <ul className="flex flex-col divide-y divide-border overflow-y-auto overscroll-contain rounded-xl border border-border bg-card px-4 md:min-h-0 md:flex-1">
                         {lines.map(({ line, item, size, lineTotal }, index) => (
                             <li
                                 key={line.sizeId}
@@ -382,7 +388,7 @@ export default function Cart() {
                         ))}
                     </ul>
 
-                    <div className="sticky bottom-0 z-10 flex flex-col gap-3 rounded-xl border border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lg lg:static lg:shadow-none">
+                    <div className="sticky bottom-0 z-10 flex shrink-0 flex-col gap-3 rounded-xl border border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-lg md:static md:p-3 md:shadow-none">
                         <div className="flex items-center justify-between">
                             <p className="font-medium">Total</p>
                             <p className="font-display text-2xl font-bold">

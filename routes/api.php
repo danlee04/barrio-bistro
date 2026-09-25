@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\OrderStatusController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffOrderController;
+use App\Http\Controllers\Admin\StaffOrderCountsController;
 use App\Http\Controllers\Admin\StaffPasswordController;
 use App\Http\Controllers\CheckoutOptionsController;
 use App\Http\Controllers\CurrentUserController;
@@ -69,6 +70,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::post('/orders/{order}/mark-paid', MarkOrderPaidController::class)->name('orders.mark-paid');
         Route::patch('/orders/{order}/status', OrderStatusController::class)->name('orders.status.update');
         Route::get('/staff/orders', StaffOrderController::class)->name('staff.orders.index');
+        Route::get('/staff/order-counts', StaffOrderCountsController::class)->name('staff.orders.counts');
 
         Route::prefix('admin')->name('admin.')->middleware(['role:admin', 'two-factor'])->group(function () {
             Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');

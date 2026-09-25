@@ -18,6 +18,7 @@ import {
     useNavigate,
 } from 'react-router';
 import { logout, type staffLoader } from '@/lib/auth';
+import { useOrderCounts } from '@/lib/order-counts';
 import { cn } from '@/lib/utils';
 
 /** Two letters for the badge: "Dan Madelo" becomes DM, "Nena" stays N. */
@@ -30,6 +31,31 @@ function initials(name: string): string {
         .join('');
 }
 
+/** How often the badges ask how much work is waiting. */
+const COUNTS_MS = 15_000;
+
+/**
+ * A count on a nav item. Dahon for "there is this much here"; achuete when
+ * something has just arrived and nobody has touched it, so the colour carries
+ * one meaning only and the number carries the other.
+ */
+function Waiting({ count, urgent }: { count: number; urgent: boolean }) {
+    if (count === 0) {
+        return null;
+    }
+
+    return (
+        <span
+            className={cn(
+                'inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[0.6875rem] font-bold tabular-nums',
+                urgent ? 'bg-achuete text-white' : 'bg-dahon text-pandan',
+            )}
+        >
+            {count > 99 ? '99+' : count}
+        </span>
+    );
+}
+
 /** The shape both footer actions take, so neither looks louder than the other. */
 const actionClasses =
     'flex min-h-10 shrink-0 items-center justify-center gap-2.5 rounded-lg px-3 hover:bg-muted md:justify-start';
@@ -37,6 +63,7 @@ const actionClasses =
 export default function AdminLayout() {
     const { user, abilities } = useLoaderData<typeof staffLoader>();
     const navigate = useNavigate();
+    const counts = useOrderCounts(COUNTS_MS);
 
     const links = [
         {
@@ -45,6 +72,8 @@ export default function AdminLayout() {
             icon: LayoutDashboard,
             end: true,
             visible: true,
+            waiting: 0,
+            urgent: false,
         },
         {
             to: '/admin/orders',
@@ -52,6 +81,8 @@ export default function AdminLayout() {
             icon: ReceiptText,
             end: false,
             visible: true,
+            waiting: counts.queue,
+            urgent: false,
         },
         {
             to: '/admin/kitchen',
@@ -59,10 +90,14 @@ export default function AdminLayout() {
             icon: CookingPot,
             end: false,
             visible: true,
+            waiting: counts.kitchen,
+            urgent: counts.kitchen_new > 0,
         },
         {
             to: '/admin/menu',
             label: 'Menu',
+            waiting: 0,
+            urgent: false,
             icon: UtensilsCrossed,
             end: false,
             visible: abilities.update_availability,
@@ -70,6 +105,8 @@ export default function AdminLayout() {
         {
             to: '/admin/gallery',
             label: 'Gallery',
+            waiting: 0,
+            urgent: false,
             icon: Images,
             end: false,
             visible: abilities.manage_staff,
@@ -77,6 +114,8 @@ export default function AdminLayout() {
         {
             to: '/admin/inquiries',
             label: 'Messages',
+            waiting: 0,
+            urgent: false,
             icon: Mail,
             end: false,
             visible: abilities.manage_staff,
@@ -84,6 +123,8 @@ export default function AdminLayout() {
         {
             to: '/admin/staff',
             label: 'Staff',
+            waiting: 0,
+            urgent: false,
             icon: Users,
             end: false,
             visible: abilities.manage_staff,
@@ -121,7 +162,23 @@ export default function AdminLayout() {
                                 aria-hidden="true"
                                 className="size-5 md:size-4"
                             />
-                            {link.label}
+
+                            {/* The badge sits at the far end of the row on a
+                                sidebar, and beside the label when the nav is
+                                a strip of stacked icons on a phone. */}
+                            <span className="inline-flex items-center gap-1.5 md:w-full md:justify-between md:gap-2">
+                                {link.label}
+                                <Waiting
+                                    count={link.waiting}
+                                    urgent={link.urgent}
+                                />
+                            </span>
+
+                            {link.waiting > 0 && (
+                                <span className="sr-only">
+                                    , {link.waiting} waiting
+                                </span>
+                            )}
                         </NavLink>
                     ))}
                 </nav>

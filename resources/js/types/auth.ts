@@ -19,6 +19,8 @@ export type Abilities = {
     mark_paid: boolean;
     manage_orders: boolean;
     cook_orders: boolean;
+    /** Only an admin may read the sales figures. */
+    view_reports: boolean;
 };
 
 export type CurrentUser = {

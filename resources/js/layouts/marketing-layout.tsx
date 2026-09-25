@@ -46,12 +46,12 @@ export default function MarketingLayout() {
             return;
         }
 
-        function measure() {
+        const measure = (): void => {
             document.documentElement.style.setProperty(
                 '--header-h',
                 `${bar.offsetHeight}px`,
             );
-        }
+        };
 
         measure();
 

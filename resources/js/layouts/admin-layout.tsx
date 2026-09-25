@@ -71,7 +71,7 @@ export default function AdminLayout() {
             label: 'Dashboard',
             icon: LayoutDashboard,
             end: true,
-            visible: true,
+            visible: abilities.view_reports,
             waiting: 0,
             urgent: false,
         },

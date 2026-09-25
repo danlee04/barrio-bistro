@@ -1,6 +1,17 @@
-import { redirect } from 'react-router';
+import { redirect, type LoaderFunctionArgs } from 'react-router';
 import { HttpError, http } from '@/lib/http';
-import type { Abilities, CurrentUser, StaffUser } from '@/types';
+import type { Abilities, CurrentUser, Role, StaffUser } from '@/types';
+
+/**
+ * Where each role starts. The dashboard is a reports screen, and reports are
+ * admin-only — sending a cashier there lands them on a page whose loader is
+ * refused before it can draw anything.
+ */
+const home: Record<Role, string> = {
+    admin: '/admin',
+    cashier: '/admin/orders',
+    kitchen: '/admin/kitchen',
+};
 
 export type TwoFactorState = {
     /** A second factor is on and confirmed for this account. */
@@ -164,7 +175,9 @@ export async function authLoader(): Promise<CurrentUser> {
 }
 
 /** Loader: signed-in staff who have replaced their temporary password. */
-export async function staffLoader(): Promise<CurrentUser> {
+export async function staffLoader({
+    request,
+}: LoaderFunctionArgs): Promise<CurrentUser> {
     const current = await authLoader();
 
     if (current.user.must_change_password) {
@@ -175,6 +188,15 @@ export async function staffLoader(): Promise<CurrentUser> {
     // send them to turn it on rather than to a screen that cannot load.
     if (current.twoFactor.required && !current.twoFactor.enabled) {
         throw redirect('/account/two-factor');
+    }
+
+    // Only the bare /admin is redirected: everywhere else the staff member
+    // asked for that page, and this is about where they land, not where they
+    // may go.
+    const landing = home[current.user.role];
+
+    if (new URL(request.url).pathname === '/admin' && landing !== '/admin') {
+        throw redirect(landing);
     }
 
     return current;

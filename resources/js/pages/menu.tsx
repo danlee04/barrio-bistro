@@ -43,10 +43,10 @@ export default function Menu() {
 
             <div className="wrapper flex flex-wrap items-end justify-between gap-4 pt-10 md:pt-14">
                 <div className="flex flex-col gap-2">
-                    <h1 className="font-display text-[clamp(2.5rem,1.9rem+3vw,4.5rem)] leading-none font-bold tracking-tight">
+                    <h1 className="font-display text-[clamp(1.75rem,1.5rem+1.2vw,2.5rem)] leading-none font-bold tracking-tight">
                         Menu
                     </h1>
-                    <p className="max-w-[48ch] text-lg text-muted-foreground">
+                    <p className="max-w-[56ch] text-sm text-muted-foreground">
                         Everything the kitchen cooks. Prices are on the order
                         screen, where you can act on them.
                     </p>
@@ -71,14 +71,14 @@ export default function Menu() {
                         aria-label="Categories"
                         className="sticky top-[var(--header-h)] z-10 mt-6 border-b border-border bg-pandan/95 backdrop-blur"
                     >
-                        <ul className="wrapper flex gap-2 overflow-x-auto overscroll-x-contain py-3">
+                        <ul className="wrapper flex gap-2 overflow-x-auto overscroll-x-contain py-2.5">
                             <li className="shrink-0">
                                 <button
                                     type="button"
                                     aria-pressed={active === null}
                                     onClick={() => choose(null)}
                                     className={cn(
-                                        'inline-flex min-h-11 items-center rounded-full border border-dahon px-4 font-medium',
+                                        'inline-flex min-h-9 items-center rounded-full border border-dahon px-3 text-sm font-medium',
                                         active === null
                                             ? 'bg-dahon text-pandan'
                                             : 'text-dahon hover:bg-dahon/10',
@@ -95,7 +95,7 @@ export default function Menu() {
                                         aria-pressed={active === category.slug}
                                         onClick={() => choose(category.slug)}
                                         className={cn(
-                                            'inline-flex min-h-11 items-center rounded-full border border-dahon px-4 font-medium',
+                                            'inline-flex min-h-9 items-center rounded-full border border-dahon px-3 text-sm font-medium',
                                             active === category.slug
                                                 ? 'bg-dahon text-pandan'
                                                 : 'text-dahon hover:bg-dahon/10',
@@ -119,7 +119,7 @@ export default function Menu() {
                                     <div className="flex items-center gap-4">
                                         <h2
                                             id={`${category.slug}-heading`}
-                                            className="font-display text-3xl font-bold tracking-tight md:text-4xl"
+                                            className="font-display text-xl font-bold tracking-tight md:text-2xl"
                                         >
                                             {category.name}
                                         </h2>

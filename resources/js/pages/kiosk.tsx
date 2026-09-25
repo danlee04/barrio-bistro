@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useRouteLoaderData, useSearchParams } from 'react-router';
 import { Plate } from '@/components/public/plate';
+import { Button } from '@/components/ui/button';
 import { restaurant } from '@/content/restaurant';
 import { clearCart } from '@/lib/cart';
-import { setKiosk } from '@/lib/kiosk';
+import { isKiosk, setKiosk } from '@/lib/kiosk';
 import { forgetOrder } from '@/lib/orders';
 import { featuredItems, type publicMenuLoader } from '@/lib/public-menu';
 import { cn } from '@/lib/utils';
@@ -25,6 +26,7 @@ export default function Kiosk() {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const [shown, setShown] = useState(0);
+    const [kiosk, setKioskState] = useState(() => isKiosk());
     const holding = useRef<number | null>(null);
 
     const featured = plates.length === 0 ? null : plates[shown % plates.length];
@@ -45,6 +47,7 @@ export default function Kiosk() {
         }
 
         setKiosk(setup === '1');
+        setKioskState(setup === '1');
 
         const next = new URLSearchParams(searchParams);
         next.delete('setup');
@@ -85,7 +88,7 @@ export default function Kiosk() {
         <>
             <title>{`Order | ${restaurant.name}`}</title>
 
-            <div className="flex min-h-svh flex-col bg-dahon text-pandan">
+            <div className="kiosk-stage flex min-h-svh flex-col bg-dahon text-pandan">
                 <p
                     onPointerDown={startHold}
                     onPointerUp={endHold}
@@ -123,6 +126,30 @@ export default function Kiosk() {
                         </span>
                     </span>
                 </button>
+
+                {/* This screen looks the same either way, so without saying so
+                    the shop cannot tell that the tablet is still behaving like
+                    an ordinary phone: no clearing between customers, and no
+                    coming back here after an order. */}
+                {!kiosk && (
+                    <div className="wrapper flex flex-wrap items-center justify-between gap-3 border-t border-pandan/15 py-4 text-sm">
+                        <p className="text-pandan/70">
+                            This device is not the counter tablet yet. Orders
+                            here behave like any other phone.
+                        </p>
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            className="min-h-11 rounded-full px-5"
+                            onClick={() => {
+                                setKiosk(true);
+                                setKioskState(true);
+                            }}
+                        >
+                            Use this device as the counter tablet
+                        </Button>
+                    </div>
+                )}
             </div>
         </>
     );

@@ -2,7 +2,12 @@ import type { ComponentType } from 'react';
 import { createBrowserRouter } from 'react-router';
 import MarketingLayout from '@/layouts/marketing-layout';
 import OrderLayout from '@/layouts/order-layout';
-import { authLoader, guestLoader, staffLoader } from '@/lib/auth';
+import {
+    authLoader,
+    guestLoader,
+    staffLoader,
+    twoFactorLoader,
+} from '@/lib/auth';
 import { adminGalleryLoader, galleryLoader } from '@/lib/gallery';
 import { inquiriesLoader } from '@/lib/inquiries';
 import {
@@ -90,6 +95,19 @@ export const router = createBrowserRouter([
         path: '/login',
         loader: guestLoader,
         lazy: page(() => import('@/pages/auth/login')),
+    },
+    {
+        // No guest loader: the password step has run, but nobody is signed in
+        // yet, so neither the guest nor the staff gate fits this screen.
+        path: '/login/two-factor',
+        lazy: page(() => import('@/pages/auth/two-factor-challenge')),
+        errorElement: <RouteError />,
+    },
+    {
+        path: '/account/two-factor',
+        loader: twoFactorLoader,
+        lazy: page(() => import('@/pages/account/two-factor')),
+        errorElement: <RouteError />,
     },
     {
         path: '/account/password',

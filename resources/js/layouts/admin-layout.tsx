@@ -3,6 +3,7 @@ import {
     Images,
     KeyRound,
     Mail,
+    ShieldCheck,
     LayoutDashboard,
     LogOut,
     ReceiptText,
@@ -141,6 +142,18 @@ export default function AdminLayout() {
                             </p>
                         </div>
                     </div>
+
+                    <Link
+                        to="/account/two-factor"
+                        aria-label="Two-step sign-in"
+                        className={actionClasses}
+                    >
+                        <ShieldCheck
+                            aria-hidden="true"
+                            className="size-4 shrink-0 text-muted-foreground"
+                        />
+                        <span className="hidden md:inline">Two-step</span>
+                    </Link>
 
                     <Link
                         to="/account/password"

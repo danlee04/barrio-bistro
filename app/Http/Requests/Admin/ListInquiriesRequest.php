@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use App\Enums\InquiryStatus;
 use App\Enums\InquiryType;
+use App\Enums\Role;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -11,11 +12,13 @@ use Illuminate\Validation\Rule;
 class ListInquiriesRequest extends FormRequest
 {
     /**
-     * The route group already keeps this to admins.
+     * The route group and the controller both hold this to admins already.
+     * Saying it a third time here costs nothing and means no single edit
+     * elsewhere can quietly open it up.
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user()?->hasRole(Role::Admin) ?? false;
     }
 
     /**

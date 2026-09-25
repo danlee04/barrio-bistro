@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use App\Models\User;
+use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -35,20 +36,29 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Attempt to authenticate the request's credentials.
+     * Check the credentials and hand back who they belong to, without signing
+     * anybody in. Nobody is authenticated here on purpose: an account with a
+     * second factor has to clear that first, and logging them in now and
+     * asking afterwards would mean they were already inside.
      *
      * @throws ValidationException
      */
-    public function authenticate(): void
+    public function findAuthenticatedUser(): User
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attemptWhen(
-            $this->only('email', 'password'),
-            fn (User $user): bool => $user->is_active,
-            $this->boolean('remember'),
-        )) {
+        $provider = Auth::createUserProvider((string) config('auth.guards.web.provider'));
+        $credentials = $this->only('email', 'password');
+        $user = $provider->retrieveByCredentials($credentials);
+
+        if (! $user instanceof User
+            || ! $provider->validateCredentials($user, $credentials)
+            || ! $user->is_active) {
             RateLimiter::hit($this->throttleKey());
+
+            // Fired by hand because the guard is not doing the attempt: the
+            // audit trail should still show every failure.
+            event(new Failed('web', $user, $credentials));
 
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
@@ -56,6 +66,8 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        return $user;
     }
 
     /**

@@ -21,6 +21,7 @@ use App\Http\Controllers\OrderPaymentController;
 use App\Http\Controllers\PayMongoWebhookController;
 use App\Http\Controllers\PublicGalleryController;
 use App\Http\Controllers\PublicMenuController;
+use App\Http\Controllers\TwoFactorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/menu', PublicMenuController::class)->name('menu.show');
@@ -53,6 +54,14 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         ->middleware('throttle:6,1')
         ->name('me.password.update');
 
+    Route::middleware('password.changed')->prefix('me/two-factor')->name('two-factor.')->group(function () {
+        Route::get('/', [TwoFactorController::class, 'show'])->name('show');
+        Route::post('/', [TwoFactorController::class, 'store'])->name('store');
+        Route::post('/confirm', [TwoFactorController::class, 'confirm'])->name('confirm');
+        Route::post('/recovery-codes', [TwoFactorController::class, 'recoveryCodes'])->name('recovery-codes');
+        Route::delete('/', [TwoFactorController::class, 'destroy'])->name('destroy');
+    });
+
     Route::middleware('password.changed')->group(function () {
         Route::patch('/menu-items/{menuItem}/availability', MenuItemAvailabilityController::class)
             ->name('menu-items.availability.update');
@@ -61,7 +70,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::patch('/orders/{order}/status', OrderStatusController::class)->name('orders.status.update');
         Route::get('/staff/orders', StaffOrderController::class)->name('staff.orders.index');
 
-        Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
+        Route::prefix('admin')->name('admin.')->middleware(['role:admin', 'two-factor'])->group(function () {
             Route::get('/staff', [StaffController::class, 'index'])->name('staff.index');
             Route::post('/staff', [StaffController::class, 'store'])->name('staff.store');
             Route::patch('/staff/{user}', [StaffController::class, 'update'])->name('staff.update');

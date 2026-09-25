@@ -25,6 +25,10 @@ class CurrentUserController extends Controller
                 'cook_orders' => $user->can('cookOrders', Order::class),
                 'view_reports' => $user->isAdmin(),
             ],
+            'two_factor' => [
+                'enabled' => $user->hasTwoFactorEnabled(),
+                'required' => $user->isAdmin(),
+            ],
         ]);
     }
 }

@@ -14,10 +14,20 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Throwable;
 
-class GalleryController extends Controller
+class GalleryController extends Controller implements HasMiddleware
 {
+    /**
+     * @return list<Middleware>
+     */
+    public static function middleware(): array
+    {
+        return [new Middleware('role:admin')];
+    }
+
     public function __construct(private readonly PhotoProcessor $photos) {}
 
     /**

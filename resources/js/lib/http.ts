@@ -118,5 +118,5 @@ export const http = {
     post: <T>(url: string, body?: unknown) => send<T>('POST', url, body),
     put: <T>(url: string, body?: unknown) => send<T>('PUT', url, body),
     patch: <T>(url: string, body?: unknown) => send<T>('PATCH', url, body),
-    delete: <T>(url: string) => send<T>('DELETE', url),
+    delete: <T>(url: string, body?: unknown) => send<T>('DELETE', url, body),
 };

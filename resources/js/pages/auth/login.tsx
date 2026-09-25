@@ -28,8 +28,9 @@ export default function Login() {
         setFormError(null);
 
         try {
-            await login(email, password);
-            await navigate('/admin');
+            const { twoFactorNeeded } = await login(email, password);
+
+            await navigate(twoFactorNeeded ? '/login/two-factor' : '/admin');
         } catch (error) {
             if (error instanceof HttpError && error.status === 422) {
                 setErrors(error.errors);

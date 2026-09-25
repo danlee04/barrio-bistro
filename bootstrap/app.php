@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsurePasswordIsChanged;
+use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\SecurityHeaders;
@@ -22,6 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(SecurityHeaders::class);
 
+        // TrustProxies is already in the default stack; which proxies it
+        // trusts is decided in AppServiceProvider, where config exists.
         $middleware->statefulApi();
         $middleware->throttleApi();
 
@@ -34,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'password.changed' => EnsurePasswordIsChanged::class,
             'paymongo.signature' => VerifyPayMongoSignature::class,
             'role' => EnsureUserHasRole::class,
+            'two-factor' => EnsureTwoFactorIsEnabled::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

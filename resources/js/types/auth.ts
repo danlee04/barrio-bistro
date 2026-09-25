@@ -24,6 +24,7 @@ export type Abilities = {
 export type CurrentUser = {
     user: StaffUser;
     abilities: Abilities;
+    twoFactor: { enabled: boolean; required: boolean };
 };
 
 export type Paginated<T> = {

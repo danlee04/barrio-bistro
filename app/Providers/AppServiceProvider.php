@@ -11,6 +11,7 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -36,9 +37,39 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureTrustedProxies();
         $this->configureRateLimiting();
         $this->configureAuthorization();
         $this->configureAuditTrail();
+    }
+
+    /**
+     * Tell the app which proxies may speak for the visitor.
+     *
+     * Without this, everything behind a load balancer or CDN reports the
+     * proxy's address: every rate limiter below collapses into one bucket that
+     * a single attacker can empty for everybody, and HSTS is never sent
+     * because the request looks like plain HTTP. The forwarded *host* stays
+     * untrusted — nothing here needs it, and trusting it would let a caller
+     * poison the host used to build URLs.
+     *
+     * It is set here rather than in `bootstrap/app.php` because the middleware
+     * closure there runs before the config repository exists.
+     */
+    protected function configureTrustedProxies(): void
+    {
+        $proxies = config('security.trusted_proxies');
+
+        if (! is_array($proxies) || $proxies === []) {
+            return;
+        }
+
+        TrustProxies::at(count($proxies) === 1 && $proxies[0] === '*' ? '*' : $proxies);
+        TrustProxies::withHeaders(
+            Request::HEADER_X_FORWARDED_FOR
+            | Request::HEADER_X_FORWARDED_PORT
+            | Request::HEADER_X_FORWARDED_PROTO
+        );
     }
 
     /**
@@ -75,6 +106,25 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(20)
             ->by($request->ip()));
+
+        // The second factor is six digits. Held tighter than the password step,
+        // because the password is already known by the time anyone gets here.
+        //
+        // Counted against the account being challenged rather than the session:
+        // a session is the attacker's to throw away and ask for a new one, but
+        // the account they are aiming at cannot be changed.
+        RateLimiter::for('two-factor', function (Request $request): array {
+            $limits = [Limit::perMinute(10)->by('ip:'.$request->ip())];
+            $pending = $request->hasSession()
+                ? $request->session()->get('two_factor.id')
+                : null;
+
+            if (is_int($pending) || is_string($pending)) {
+                $limits[] = Limit::perMinute(5)->by('two-factor:'.$pending);
+            }
+
+            return $limits;
+        });
 
         // A restaurant full of guests shares one connection, so the tighter
         // limit is per device and the looser one per address.

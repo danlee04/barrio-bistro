@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\Role;
 use App\Models\User;
+use App\Services\TwoFactorAuthenticator;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -40,9 +41,45 @@ class UserFactory extends Factory
     /**
      * Indicate that the user is an admin.
      */
+    /**
+     * An admin, and therefore one with the second factor already on: the admin
+     * area refuses an account without it, so an admin lacking one is a
+     * half-made account, not a usable one. Ask for `withoutTwoFactor()` when
+     * that half-made state is the thing under test.
+     */
     public function admin(): static
     {
-        return $this->state(fn (array $attributes) => ['role' => Role::Admin]);
+        return $this
+            ->state(fn (array $attributes): array => ['role' => Role::Admin])
+            ->withTwoFactor();
+    }
+
+    /**
+     * Strip the second factor back off, for the tests that are about not
+     * having one yet.
+     */
+    public function withoutTwoFactor(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null,
+            'two_factor_confirmed_at' => null,
+            'two_factor_last_step' => null,
+        ]);
+    }
+
+    /**
+     * An account with the second factor already switched on and confirmed.
+     * The secret is fixed so a test can work out the code of the moment.
+     */
+    public function withTwoFactor(string $secret = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'two_factor_secret' => $secret,
+            'two_factor_recovery_codes' => app(TwoFactorAuthenticator::class)
+                ->hashRecoveryCodes(['aaaaaaaaaa', 'bbbbbbbbbb', 'cccccccccc']),
+            'two_factor_confirmed_at' => now(),
+        ]);
     }
 
     /**

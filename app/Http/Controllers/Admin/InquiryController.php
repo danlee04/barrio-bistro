@@ -10,9 +10,19 @@ use App\Http\Resources\InquiryResource;
 use App\Models\AuditLog;
 use App\Models\Inquiry;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class InquiryController extends Controller
+class InquiryController extends Controller implements HasMiddleware
 {
+    /**
+     * @return list<Middleware>
+     */
+    public static function middleware(): array
+    {
+        return [new Middleware('role:admin')];
+    }
+
     /**
      * The message book, newest first, optionally narrowed to one status or kind.
      */

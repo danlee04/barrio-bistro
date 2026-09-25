@@ -7,8 +7,10 @@ use App\Enums\InquiryType;
 use Carbon\CarbonImmutable;
 use Database\Factories\InquiryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Support\Carbon;
 
 /**
@@ -35,7 +37,7 @@ use Illuminate\Support\Carbon;
 class Inquiry extends Model
 {
     /** @use HasFactory<InquiryFactory> */
-    use HasFactory;
+    use HasFactory, Prunable;
 
     /**
      * In-memory defaults that mirror the database.
@@ -45,6 +47,33 @@ class Inquiry extends Model
     protected $attributes = [
         'status' => InquiryStatus::New->value,
     ];
+
+    /**
+     * Messages older than the retention period are deleted, whatever their
+     * status: nobody is coming back to a year-old enquiry, and keeping a
+     * stranger's number past its usefulness is not ours to do.
+     *
+     * @return Builder<static>
+     */
+    public function prunable(): Builder
+    {
+        return static::query()->where(
+            'created_at',
+            '<',
+            now()->subDays((int) config('security.inquiry_retention_days')),
+        );
+    }
+
+    /**
+     * Note that it went, without writing down what it said.
+     */
+    protected function pruning(): void
+    {
+        AuditLog::record('inquiry.pruned', context: [
+            'id' => $this->id,
+            'type' => $this->type->value,
+        ]);
+    }
 
     /**
      * Get the attributes that should be cast.

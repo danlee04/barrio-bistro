@@ -60,3 +60,22 @@ test('inline style attributes are allowed, but injected stylesheets are not', fu
         ->and($policy)->not->toContain("style-src 'self' 'unsafe-inline'")
         ->and($policy)->toContain("script-src 'self' 'nonce-");
 });
+
+test('the session cookie is secure in production without anyone remembering', function () {
+    $previousEnv = $_ENV['APP_ENV'] ?? null;
+    $previousServer = $_SERVER['APP_ENV'] ?? null;
+
+    try {
+        foreach (['local', 'production'] as $environment) {
+            $_ENV['APP_ENV'] = $environment;
+            $_SERVER['APP_ENV'] = $environment;
+
+            $session = require base_path('config/session.php');
+
+            expect($session['secure'])->toBe($environment === 'production');
+        }
+    } finally {
+        $_ENV['APP_ENV'] = $previousEnv;
+        $_SERVER['APP_ENV'] = $previousServer;
+    }
+});
